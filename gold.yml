@@ -1,0 +1,6 @@
+# Sample configuration file for machine learning params
+
+# Filters on which data to extract from the corpus
+data-filters:
+  activity: walk
+  position: waist
