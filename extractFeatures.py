@@ -4,35 +4,23 @@ import os, yaml
 from optparse import OptionParser
 import gyrodata
 
-def isValidEntry(entry, config):
-    filters = config['data-filters']
-    containsAttributes = ['activity', 'position']
-    presentAttributes = ['accfile', 'gyrofile']
-    for attr in containsAttributes:
-        if attr in filters:
-            if filters[attr] not in entry[attr]:
-                return False
-
-    for attr in presentAttributes:
-        if attr in filters:
-            if filters[attr] and not entry[attr]:
-                return False
-    return True
+def extractFeatures(entry, config):
+    return []
 
 def main():
-    parser = OptionParser(usage="usage: %prog [options] source")
+    parser = OptionParser(usage="usage: %prog [options] data")
 
     parser.add_option("-c", "--config-file",
             action="store",
             dest="config",
             default="gold.yml",
-            help="Configuration file for filter",)
+            help="Configuration file for features",)
 
     parser.add_option("-o", "--output",
             action="store",
             dest="output",
             default="filtered.csv",
-            help="Output file",)
+            help="Output file of features",)
 
     (options, args) = parser.parse_args()
 
@@ -46,9 +34,8 @@ def main():
         sys.exit("Unable to find configuration file " + options.config)
 
     data = gyrodata.readMetadata(args[0])
-
-    filteredData = [entry for entry in data if isValidEntry(entry, config)]
-    gyrodata.writeMetadata(filteredData, options.output)
+    features = [extractFeatures(entry, config) for entry in data]
+    gyrodata.writeCsvData(features, options.output)
     
 if __name__ == '__main__':
     main()

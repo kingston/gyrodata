@@ -20,3 +20,13 @@ def readMetadata(path):
         for row in metareader:
             data.append(dict(zip(getAttributeList(), row)))
     return data
+
+def readCsvData(path):
+    with open(path, 'r') as csvfile:
+        csvreader = csv.reader(csvfile, delimiter=',')
+        return list(csvreader)
+
+def writeCsvData(data, path):
+    with open(path, 'wb') as csvfile:
+        csvwriter = csv.writer(csvfile, delimiter=',')
+        csvwriter.writerows(data)

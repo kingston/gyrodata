@@ -15,18 +15,24 @@ def safeRun(command):
         sys.exit("Error running command: " + command)
 
 def runData(config, options):
-    #TODO: Remove and add bottom line back
-    # Remove all files
-    safeRun("rm -f tmp/*")
-
     # Create temporary prefix
     prefix = "tmp/" + id_generator()
     filteredCsv = prefix + "_filtered.csv"
+    featuresCsv = prefix + "_features.csv"
+    outputCsv = prefix + "_output.csv"
+
     # Create filter data
     safeRun("./filterMetadata.py -c %s -o %s data/meta.csv" % (options.config, filteredCsv))
 
+    # Extract features and output
+    safeRun("./extractFeatures.py -c %s -o %s %s" % (options.config, featuresCsv, filteredCsv))
+    safeRun("./extractOutput.py -c %s -o %s %s" % (options.config, outputCsv, filteredCsv))
+
+    # Test data
+    safeRun("./trainTest.py -c %s %s %s" % (options.config, featuresCsv, outputCsv))
+
     # Remove all prefixed files
-    #safeRun("rm -f tmp/%s*" % prefix)
+    safeRun("rm -f tmp/%s*" % prefix)
 
 def main():
     parser = OptionParser(usage="usage: %prog [options]")

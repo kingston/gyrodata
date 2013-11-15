@@ -4,3 +4,11 @@
 data-filters:
   activity: walk
   position: waist
+  accfile: true # has accfile
+  gyrofile: true # has gyrofile
+
+# Output variable configuration
+output:
+  variable: weight
+  is-bucketed: false
+
