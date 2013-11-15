@@ -13,6 +13,7 @@ def findActivityFolder(path, activity):
 
 def parseMeta(path):
     attributeMap = {
+            'Activity': 'activity',
             'Gender': 'gender',
             'Generation': 'age',
             'Height(cm)': 'height',
@@ -51,7 +52,14 @@ def main():
 
     parser.add_option("-a", "--activity",
             action="store",
-            default="walk",
+            dest="activity",
+            default="",
+            help="Type of activity to record",)
+
+    parser.add_option("-o", "--output",
+            action="store",
+            dest="output",
+            default="meta.csv",
             help="Type of activity to record",)
 
     (options, args) = parser.parse_args()
@@ -60,19 +68,27 @@ def main():
         parser.error("wrong number of arguments")
 
     # Start parsing
-    activityFolder = findActivityFolder(args[0], options.activity)
-    if activityFolder is None:
-        print("Unable to find activity folder for " + options.activity)
-        return
+    if options.activity:
+        activityFolder = findActivityFolder(args[0], options.activity)
+        if activityFolder is None:
+            print("Unable to find activity folder for " + options.activity)
+            return
+    else:
+        activityFolder = args[0]
 
     (accFiles, gyroFiles, metaData) = getDataEntries(activityFolder)
+    print len(metaData)
 
-    with open('meta.csv', 'wb') as csvfile:
+    with open(options.output, 'wb') as csvfile:
         metawriter = csv.writer(csvfile, delimiter=',')
         for entry in metaData:
             record = []
             id = entry['id']
             record.append(id)
+            if 'activity' in entry:
+                record.append(entry['activity'])
+            else:
+                record.append('realworld')
             record.append(entry['gender'])
             record.append(entry['age'])
             record.append(entry['height'])
