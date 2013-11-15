@@ -9,24 +9,28 @@ data-filters:
 
 # Output variable configuration
 output:
-  variable: height
+  variable: weight
   is-bucketed: true
   buckets:
-    num: 3
+    num: 4
 
 validation:
   # Type of data validation
   #  - holdout
-  type: holdout
+  #  - k-fold
+  type: k-fold
   # whether data should be randomly sorted first
   randomizeSort: true
   # seed for predictable results
-  randomSeed: 813841038
+  randomSeed: ~
   holdout:
     trainSize: 0.7
+  k-fold:
+    k: 10
 
 model:
   # Type of model to run it on
   # - gaussian-naive-bayes
   # - logistic-regression
-  type: logistic-regression
+  # - svc (SVM)
+  type: svc

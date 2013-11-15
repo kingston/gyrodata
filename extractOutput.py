@@ -1,8 +1,13 @@
 #!/usr/bin/env python
 
-import os, yaml
+import os, yaml, random
 from optparse import OptionParser
 import gyrodata, datamodel
+
+def parseEntry(entry, variable):
+    if variable == "age":
+        return float(entry['age'].split(';')[0])
+    return float(entry[variable])
 
 def extractMetadata(data, config):
     outputConfig = config['output']
@@ -14,7 +19,7 @@ def extractMetadata(data, config):
     if isBucketed:
         bucketConfig = outputConfig['buckets']
         # find bucket points
-        outputs = sorted([float(entry[variable]) for entry in data])
+        outputs = sorted([parseEntry(entry, variable) for entry in data])
         numOutputs = len(outputs)
         numBuckets = bucketConfig['num']
         metadata['splits'] = [outputs[i * (numOutputs / numBuckets)] for i in range(1, numBuckets)]
@@ -24,11 +29,11 @@ def extractOutput(entry, metadata, config):
     outputConfig = config['output']
     variable = outputConfig['variable']
     isBucketed = outputConfig['is-bucketed']
-    output = float(entry[variable])
+    output = parseEntry(entry, variable)
     if isBucketed:
         i = 0
         for split in metadata['splits']:
-            if output < split:
+            if output <= split:
                 break
             i += 1
         output = i

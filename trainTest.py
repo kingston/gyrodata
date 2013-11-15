@@ -3,20 +3,15 @@
 import os, sys, yaml, random
 from optparse import OptionParser
 import gyrodata, datamodel
+from sklearn import cross_validation
+from numpy import *
 
 def most_common_count (lst):
     return max(((item, lst.count(item)) for item in set(lst)), key=lambda a: a[1])[1]
 
-def trainTest(config, X, Y, testFeatures, testOutput):
+def trainTest(config, X, Y, testFeatures, testOutput, showBaseline=False):
     modelSettings = config['model']
     modelType = modelSettings['type']
-
-    # normalize input
-    X = [[float(x) for x in l] for l in X]
-    testFeatures = [[float(x) for x in l] for l in testFeatures]
-    # normalize output (only one output for all cases we have)
-    Y = [int(y[0]) for y in Y]
-    testOutput = [int(y[0]) for y in testOutput]
 
     if modelType == "gaussian-naive-bayes":
         predicted = datamodel.predictWithGaussianNaiveBayes(config, X, Y, testFeatures)
@@ -24,14 +19,31 @@ def trainTest(config, X, Y, testFeatures, testOutput):
     elif modelType == "logistic-regression":
         predicted = datamodel.predictWithLogisticRegression(config, X, Y, testFeatures)
         isDiscrete = True
+    elif modelType == "svc":
+        predicted = datamodel.predictWithSVC(config, X, Y, testFeatures)
+        isDiscrete = True
     else:
         sys.exit("Unknown model type: " + modelType)
 
     numCorrect = len([i for i, j in zip(predicted, testOutput) if i == j])
-    if isDiscrete:
+    if isDiscrete and showBaseline:
         baseline = float(most_common_count(testOutput)) / len(testOutput)
         print "Baseline: " + "%.2f" % (baseline * 100) + "%"
     return float(numCorrect) / len(testOutput)
+
+def runWithKFold(config, features, output):
+    k = config['validation']['k-fold']['k']
+    skf = cross_validation.StratifiedKFold(output, n_folds = k)
+
+    X = array(features)
+    Y = array(output)
+    accuracies = []
+    for train_index, test_index in skf:
+        X_train, X_test = X[train_index], X[test_index]
+        Y_train, Y_test = Y[train_index], Y[test_index]
+
+        accuracies.append(trainTest(config, X_train, Y_train, X_test, Y_test))
+    return sum(accuracies) / len(accuracies)
 
 def runWithHoldout(config, features, output):
     n = len(features)
@@ -42,7 +54,7 @@ def runWithHoldout(config, features, output):
     trainOutput = output[0:sep]
     testOutput = output[sep:]
 
-    return trainTest(config, trainFeatures, trainOutput, testFeatures, testOutput)
+    return trainTest(config, trainFeatures, trainOutput, testFeatures, testOutput, True)
 
 def runData(config, features, output):
     validationSettings = config['validation']
@@ -57,6 +69,8 @@ def runData(config, features, output):
     validationType = validationSettings['type']
     if validationType == "holdout":
         return runWithHoldout(config, features, output)
+    elif validationType == "k-fold":
+        return runWithKFold(config, features, output)
     else:
         sys.exit("Unknown validation type: " + validationType)
 
@@ -82,6 +96,10 @@ def main():
 
     features = gyrodata.readCsvData(args[0])
     output = gyrodata.readCsvData(args[1])
+
+    # normalize features/output (may be false assumption)
+    features = [[float(x) for x in l] for l in features]
+    output = [int(l[0]) for l in output]
 
     print ""
     accuracy = runData(config, features, output)

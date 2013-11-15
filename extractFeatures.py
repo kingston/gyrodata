@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os, yaml
+import os, yaml, random
 from optparse import OptionParser
 import gyrodata
 from numpy import *
@@ -15,7 +15,7 @@ def extractFeatures(entry, config):
     if config['data-filters']['gyrofile']:
         gyroData = array(readNumericData(entry['gyrofile']))
 
-    return accData.max(axis=0)[1:]
+    return accData.max(axis=0)[1:].tolist() + gyroData.max(axis=0)[1:].tolist()
 
 def main():
     parser = OptionParser(usage="usage: %prog [options] data")
