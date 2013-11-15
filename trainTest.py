@@ -1,15 +1,36 @@
 #!/usr/bin/env python
 
-import os, yaml
+import os, sys, yaml, random
 from optparse import OptionParser
 import gyrodata
 
-def log(config, message):
-    if 'verbose' in config and config['verbose']:
-        print message
+def trainTest(config, trainFeatures, trainOutput, testFeatures, testOutput):
+    return 0.3
+
+def runWithHoldout(config, features, output):
+    n = len(features)
+    trainSize = config['validation']['holdout']['trainSize']
+    sep = int(n * trainSize)
+    trainFeatures = features[0:sep]
+    testFeatures = features[sep:]
+    trainOutput = output[0:sep]
+    testOutput = output[sep:]
+
+    return trainTest(config, trainFeatures, trainOutput, testFeatures, testOutput)
 
 def runData(config, features, output):
-    return 1
+    validationSettings = config['validation']
+    # Sort if needs be
+    if validationSettings['randomizeSort']:
+        data = zip(features, output)
+        random.shuffle(data)
+        features, output = zip(*data)
+    # Run with random type
+    validationType = validationSettings['type']
+    if validationType == "holdout":
+        return runWithHoldout(config, features, output)
+    else:
+        sys.exit("Unknown validation type: " + validationType)
 
 def main():
     parser = OptionParser(usage="usage: %prog [options] feature_file output_file")
@@ -37,6 +58,11 @@ def main():
     accuracy = runData(config, features, output)
     print ""
     print "Accuracy: " + "%.2f" % (accuracy * 100) + "%"
+
+def log(config, message):
+    if 'verbose' in config and config['verbose']:
+        print message
+
 
 if __name__ == '__main__':
     main()

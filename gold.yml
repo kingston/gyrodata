@@ -12,3 +12,11 @@ output:
   variable: weight
   is-bucketed: false
 
+validation:
+  # Type of data validation
+  #  - holdout
+  type: holdout
+  # whether data should be randomly sorted first
+  randomizeSort: false
+  holdout:
+    trainSize: 0.3
