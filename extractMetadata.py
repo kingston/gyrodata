@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 import os
-import csv
 from optparse import OptionParser
+import gyrodata
 
 def findActivityFolder(path, activity):
     for subdir in os.listdir(path):
@@ -20,16 +20,32 @@ def parseMeta(path):
             'Weight(kg)': 'weight',
             'TerminalPosition': 'position',
             'TerminalMount': 'mount',
-    }
+            }
     data = {
             'id': os.path.basename(path).replace(".meta", ""),
-    }
+            }
     with open(path) as f:
         for line in f:
             parts = line.strip().split(':')
             if len(parts) == 2 and parts[0].strip() in attributeMap:
                 data[attributeMap[parts[0].strip()]] = parts[1].strip()
     return data
+
+def formatMetadata(metaData, accFiles, gyroFiles):
+    for entry in metaData:
+        if 'activity' not in entry:
+            entry['activity'] = 'realworld'
+        id = entry['id']
+        if id in accFiles:
+            entry['accfile'] = accFiles[id]
+        else:
+            entry['accfile'] = ""
+
+        if id in gyroFiles:
+            entry['gyrofile'] = gyroFiles[id]
+        else:
+            entry['gyrofile'] = ""
+    return metaData
 
 def getDataEntries(path):
     accFiles = {}
@@ -45,7 +61,7 @@ def getDataEntries(path):
                     gyroFiles[filename.replace("-gyro.csv", "")] = fullPath
                 elif filename.endswith(".meta"):
                     metaData.append(parseMeta(fullPath))
-    return (accFiles, gyroFiles, metaData)
+    return formatMetadata(metaData, accFiles, gyroFiles)
 
 def main():
     parser = OptionParser(usage="usage: %prog [options] directory")
@@ -60,7 +76,7 @@ def main():
             action="store",
             dest="output",
             default="meta.csv",
-            help="Type of activity to record",)
+            help="Output file",)
 
     (options, args) = parser.parse_args()
 
@@ -76,33 +92,9 @@ def main():
     else:
         activityFolder = args[0]
 
-    (accFiles, gyroFiles, metaData) = getDataEntries(activityFolder)
-    print len(metaData)
+    metaData = getDataEntries(activityFolder)
 
-    with open(options.output, 'wb') as csvfile:
-        metawriter = csv.writer(csvfile, delimiter=',')
-        for entry in metaData:
-            record = []
-            id = entry['id']
-            record.append(id)
-            if 'activity' in entry:
-                record.append(entry['activity'])
-            else:
-                record.append('realworld')
-            record.append(entry['gender'])
-            record.append(entry['age'])
-            record.append(entry['height'])
-            record.append(entry['weight'])
-            record.append(entry['position'])
-            if id in accFiles:
-                record.append(accFiles[id])
-            else:
-                record.append("")
-            if id in gyroFiles:
-                record.append(gyroFiles[id])
-            else:
-                record.append("")
-            metawriter.writerow(record)
-    
+    gyrodata.writeMetadata(metaData, options.output)
+
 if __name__ == '__main__':
     main()
