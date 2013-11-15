@@ -14,7 +14,7 @@ def extractMetadata(data, config):
     if isBucketed:
         bucketConfig = outputConfig['buckets']
         # find bucket points
-        outputs = sorted([entry[variable] for entry in data])
+        outputs = sorted([float(entry[variable]) for entry in data])
         numOutputs = len(outputs)
         numBuckets = bucketConfig['num']
         metadata['splits'] = [outputs[i * (numOutputs / numBuckets)] for i in range(1, numBuckets)]
@@ -24,7 +24,7 @@ def extractOutput(entry, metadata, config):
     outputConfig = config['output']
     variable = outputConfig['variable']
     isBucketed = outputConfig['is-bucketed']
-    output = entry[variable]
+    output = float(entry[variable])
     if isBucketed:
         i = 0
         for split in metadata['splits']:

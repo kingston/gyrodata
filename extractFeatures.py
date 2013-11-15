@@ -3,9 +3,19 @@
 import os, yaml
 from optparse import OptionParser
 import gyrodata
+from numpy import *
+
+def readNumericData(path):
+    data = gyrodata.readCsvData(path)
+    return [[float(x or 0) for x in l] for l in data]
 
 def extractFeatures(entry, config):
-    return []
+    if config['data-filters']['accfile']:
+        accData = array(readNumericData(entry['accfile']))
+    if config['data-filters']['gyrofile']:
+        gyroData = array(readNumericData(entry['gyrofile']))
+
+    return accData.max(axis=0)[1:]
 
 def main():
     parser = OptionParser(usage="usage: %prog [options] data")

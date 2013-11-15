@@ -11,12 +11,18 @@ def trainTest(config, X, Y, testFeatures, testOutput):
     modelSettings = config['model']
     modelType = modelSettings['type']
 
+    # normalize input
+    X = [[float(x) for x in l] for l in X]
+    testFeatures = [[float(x) for x in l] for l in testFeatures]
     # normalize output (only one output for all cases we have)
     Y = [int(y[0]) for y in Y]
     testOutput = [int(y[0]) for y in testOutput]
 
     if modelType == "gaussian-naive-bayes":
         predicted = datamodel.predictWithGaussianNaiveBayes(config, X, Y, testFeatures)
+        isDiscrete = True
+    elif modelType == "logistic-regression":
+        predicted = datamodel.predictWithLogisticRegression(config, X, Y, testFeatures)
         isDiscrete = True
     else:
         sys.exit("Unknown model type: " + modelType)
@@ -43,6 +49,8 @@ def runData(config, features, output):
     # Sort if needs be
     if validationSettings['randomizeSort']:
         data = zip(features, output)
+        if 'randomSeed' in validationSettings and validationSettings['randomSeed']:
+            random.seed(validationSettings['randomSeed'])
         random.shuffle(data)
         features, output = zip(*data)
     # Run with random type
