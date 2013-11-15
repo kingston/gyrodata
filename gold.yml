@@ -10,7 +10,9 @@ data-filters:
 # Output variable configuration
 output:
   variable: weight
-  is-bucketed: false
+  is-bucketed: true
+  buckets:
+    num: 3
 
 validation:
   # Type of data validation
@@ -20,3 +22,8 @@ validation:
   randomizeSort: false
   holdout:
     trainSize: 0.3
+
+model:
+  # Type of model to run it on
+  # - gaussian-naive-bayes
+  type: gaussian-naive-bayes

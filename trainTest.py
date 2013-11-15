@@ -2,10 +2,30 @@
 
 import os, sys, yaml, random
 from optparse import OptionParser
-import gyrodata
+import gyrodata, datamodel
 
-def trainTest(config, trainFeatures, trainOutput, testFeatures, testOutput):
-    return 0.3
+def most_common_count (lst):
+    return max(((item, lst.count(item)) for item in set(lst)), key=lambda a: a[1])[1]
+
+def trainTest(config, X, Y, testFeatures, testOutput):
+    modelSettings = config['model']
+    modelType = modelSettings['type']
+
+    # normalize output (only one output for all cases we have)
+    Y = [int(y[0]) for y in Y]
+    testOutput = [int(y[0]) for y in testOutput]
+
+    if modelType == "gaussian-naive-bayes":
+        predicted = datamodel.predictWithGaussianNaiveBayes(config, X, Y, testFeatures)
+        isDiscrete = True
+    else:
+        sys.exit("Unknown model type: " + modelType)
+
+    numCorrect = len([i for i, j in zip(predicted, testOutput) if i == j])
+    if isDiscrete:
+        baseline = float(most_common_count(testOutput)) / len(testOutput)
+        print "Baseline: " + "%.2f" % (baseline * 100) + "%"
+    return float(numCorrect) / len(testOutput)
 
 def runWithHoldout(config, features, output):
     n = len(features)
@@ -55,8 +75,8 @@ def main():
     features = gyrodata.readCsvData(args[0])
     output = gyrodata.readCsvData(args[1])
 
-    accuracy = runData(config, features, output)
     print ""
+    accuracy = runData(config, features, output)
     print "Accuracy: " + "%.2f" % (accuracy * 100) + "%"
 
 def log(config, message):
