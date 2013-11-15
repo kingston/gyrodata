@@ -7,7 +7,7 @@ import gyrodata
 def isValidEntry(entry, config):
     filters = config['data-filters']
     containsAttributes = ['activity', 'position']
-    presentAttributes = ['accfile', 'gyrofile']
+    presentAttributes = ['accfile', 'gyrofile', 'weight', 'height']
     for attr in containsAttributes:
         if attr in filters:
             if filters[attr] not in entry[attr]:

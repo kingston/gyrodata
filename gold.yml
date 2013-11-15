@@ -4,8 +4,10 @@
 data-filters:
   activity: walk
   position: waist
-  accfile: true # has accfile
-  gyrofile: true # has gyrofile
+  # check for attribute existence
+  weight: true
+  accfile: true
+  gyrofile: true
 
 # Output variable configuration
 output:
@@ -27,10 +29,12 @@ validation:
     trainSize: 0.7
   k-fold:
     k: 10
+    stratify: true
 
 model:
   # Type of model to run it on
   # - gaussian-naive-bayes
   # - logistic-regression
   # - svc (SVM)
+  # - svr (SVM with regression)
   type: svc

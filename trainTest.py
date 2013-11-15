@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os, sys, yaml, random
+import os, sys, yaml, random, math
 from optparse import OptionParser
 import gyrodata, datamodel
 from sklearn import cross_validation
@@ -9,31 +9,48 @@ from numpy import *
 def most_common_count (lst):
     return max(((item, lst.count(item)) for item in set(lst)), key=lambda a: a[1])[1]
 
-def trainTest(config, X, Y, testFeatures, testOutput, showBaseline=False):
+def getModel(config):
     modelSettings = config['model']
     modelType = modelSettings['type']
 
-    if modelType == "gaussian-naive-bayes":
-        predicted = datamodel.predictWithGaussianNaiveBayes(config, X, Y, testFeatures)
-        isDiscrete = True
-    elif modelType == "logistic-regression":
-        predicted = datamodel.predictWithLogisticRegression(config, X, Y, testFeatures)
-        isDiscrete = True
-    elif modelType == "svc":
-        predicted = datamodel.predictWithSVC(config, X, Y, testFeatures)
-        isDiscrete = True
+    models = {
+        "gaussian-naive-bayes": datamodel.predictWithGaussianNaiveBayes,
+        "logistic-regression": datamodel.predictWithLogisticRegression,
+        "svc": datamodel.predictWithSVC,
+        "svr": datamodel.predictWithSVR,
+    }
+    if modelType in models:
+        return models[modelType]
     else:
         sys.exit("Unknown model type: " + modelType)
 
-    numCorrect = len([i for i, j in zip(predicted, testOutput) if i == j])
-    if isDiscrete and showBaseline:
-        baseline = float(most_common_count(testOutput)) / len(testOutput)
-        print "Baseline: " + "%.2f" % (baseline * 100) + "%"
-    return float(numCorrect) / len(testOutput)
+def trainTest(config, X, Y, testFeatures, testOutput, showBaseline=False):
+    model = getModel(config)
+    predicted = model(config, X, Y, testFeatures)
+    isDiscrete = model.isDiscrete
+
+    if isDiscrete:
+        numCorrect = len([i for i, j in zip(predicted, testOutput) if i == j])
+        if showBaseline:
+            baseline = float(most_common_count(testOutput)) / len(testOutput)
+            print "Baseline: " + "%.2f" % (baseline * 100) + "%"
+        accuracy = float(numCorrect) / len(testOutput)
+    else:
+        if showBaseline:
+            avg = float(sum(testOutput)) / len(testOutput)
+            baselineDifferences = sum([abs(avg - real) for real in testOutput])
+            baseline = float(baselineDifferences) / len(testOutput)
+            print "Baseline Difference: " + "%.2f" % baseline
+        sumofdifferences = sum([abs(pred - real) for pred, real in zip(predicted, testOutput)])
+        accuracy = float(sumofdifferences) / len(testOutput)
+    return accuracy
 
 def runWithKFold(config, features, output):
     k = config['validation']['k-fold']['k']
-    skf = cross_validation.StratifiedKFold(output, n_folds = k)
+    if config['validation']['k-fold']['stratify']:
+        skf = cross_validation.StratifiedKFold(output, n_folds = k)
+    else:
+        skf = cross_validation.KFold(len(output), n_folds = k)
 
     X = array(features)
     Y = array(output)
@@ -96,14 +113,22 @@ def main():
 
     features = gyrodata.readCsvData(args[0])
     output = gyrodata.readCsvData(args[1])
+    model = getModel(config)
 
     # normalize features/output (may be false assumption)
     features = [[float(x) for x in l] for l in features]
-    output = [int(l[0]) for l in output]
+    if model.isDiscrete:
+        output = [int(l[0]) for l in output]
+    else:
+        output = [float(l[0]) for l in output]
 
     print ""
     accuracy = runData(config, features, output)
-    print "Accuracy: " + "%.2f" % (accuracy * 100) + "%"
+    # Output accuracy correctly
+    if model.isDiscrete:
+        print "Accuracy: " + "%.2f" % (accuracy * 100) + "%"
+    else:
+        print "Average Absolute Error: " + "%.2f" % accuracy
 
 def log(config, message):
     if 'verbose' in config and config['verbose']:
