@@ -16,7 +16,10 @@ def getModel(config):
     models = {
         "gaussian-naive-bayes": datamodel.predictWithGaussianNaiveBayes,
         "logistic-regression": datamodel.predictWithLogisticRegression,
+        "random-forest": datamodel.predictWithRandomForest,
         "svc": datamodel.predictWithSVC,
+        "lda": datamodel.predictWithLDA,
+        "qda": datamodel.predictWithQDA,
         "svr": datamodel.predictWithSVR,
     }
     if modelType in models:
@@ -44,6 +47,9 @@ def trainTest(config, X, Y, testFeatures, testOutput, showBaseline=False):
         sumofdifferences = sum([abs(pred - real) for pred, real in zip(predicted, testOutput)])
         accuracy = float(sumofdifferences) / len(testOutput)
     return accuracy
+
+def runWithSameTrainTest(config, features, output):
+    return trainTest(config, features, output, features, output, True)
 
 def runWithKFold(config, features, output):
     k = config['validation']['k-fold']['k']
@@ -88,6 +94,8 @@ def runData(config, features, output):
         return runWithHoldout(config, features, output)
     elif validationType == "k-fold":
         return runWithKFold(config, features, output)
+    elif validationType == "same":
+        return runWithSameTrainTest(config, features, output)
     else:
         sys.exit("Unknown validation type: " + validationType)
 

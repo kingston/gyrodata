@@ -2,6 +2,9 @@
 from numpy import *
 from sklearn.naive_bayes import GaussianNB
 from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.lda import LDA
+from sklearn.qda import QDA
 from sklearn import svm
 
 # Function decorators for tagging methods
@@ -23,6 +26,24 @@ def predictWithGaussianNaiveBayes(config, X, Y, testFeatures):
 @discreteResponse
 def predictWithLogisticRegression(config, X, Y, testFeatures):
     clf = LogisticRegression()
+    clf.fit(X, Y)
+    return clf.predict(testFeatures)
+
+@discreteResponse
+def predictWithRandomForest(config, X, Y, testFeatures):
+    clf = RandomForestClassifier()
+    clf.fit(X, Y)
+    return clf.predict(testFeatures)
+
+@discreteResponse
+def predictWithLDA(config, X, Y, testFeatures):
+    clf = LDA()
+    clf.fit(X, Y)
+    return clf.predict(testFeatures)
+
+@discreteResponse
+def predictWithQDA(config, X, Y, testFeatures):
+    clf = QDA()
     clf.fit(X, Y)
     return clf.predict(testFeatures)
 

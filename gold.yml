@@ -14,12 +14,13 @@ output:
   variable: weight
   is-bucketed: true
   buckets:
-    num: 4
+    num: 5
 
 validation:
   # Type of data validation
   #  - holdout
   #  - k-fold
+  #  - same (use train set as test)
   type: k-fold
   # whether data should be randomly sorted first
   randomizeSort: true
@@ -28,13 +29,16 @@ validation:
   holdout:
     trainSize: 0.7
   k-fold:
-    k: 10
+    k: 5
     stratify: true
 
 model:
   # Type of model to run it on
   # - gaussian-naive-bayes
   # - logistic-regression
+  # - random-forest
+  # - lda (Linear Discriminant Analysis)
+  # - qda (Quadratic Discriminant Analysis)
   # - svc (SVM)
   # - svr (SVM with regression)
-  type: svc
+  type: random-forest
