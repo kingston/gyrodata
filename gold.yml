@@ -11,8 +11,8 @@ data-filters:
 
 # Output variable configuration
 output:
-  variable: weight
-  is-bucketed: true
+  variable: gender
+  is-bucketed: false
   buckets:
     num: 5
 
@@ -21,7 +21,7 @@ validation:
   #  - holdout
   #  - k-fold
   #  - same (use train set as test)
-  type: k-fold
+  type: holdout
   # whether data should be randomly sorted first
   randomizeSort: true
   # seed for predictable results

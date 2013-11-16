@@ -5,9 +5,17 @@ from optparse import OptionParser
 import gyrodata, datamodel
 
 def parseEntry(entry, variable):
+    val = entry[variable]
     if variable == "age":
-        return float(entry['age'].split(';')[0])
-    return float(entry[variable])
+        return float(val.split(';')[0])
+    elif variable == "gender":
+        if val == 'male':
+            return 0
+        elif val == 'female':
+            return 1
+        else:
+            sys.exit("Unknown gender: " + val)
+    return float(val)
 
 def extractMetadata(data, config):
     outputConfig = config['output']
