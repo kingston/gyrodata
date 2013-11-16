@@ -3,10 +3,12 @@
 import os, yaml
 from optparse import OptionParser
 import gyrodata
+from itertools import groupby
+from operator import itemgetter
 
 def isValidEntry(entry, config):
     filters = config['data-filters']
-    containsAttributes = ['activity', 'position']
+    containsAttributes = ['activity', 'position', 'activityFolder']
     presentAttributes = ['accfile', 'gyrofile', 'weight', 'height']
     for attr in containsAttributes:
         if attr in filters:
@@ -48,6 +50,11 @@ def main():
     data = gyrodata.readMetadata(args[0])
 
     filteredData = [entry for entry in data if isValidEntry(entry, config)]
+
+    # filter by person
+    if config['data-filters']['unique']:
+        filteredData = [group.next() for key, group in groupby(filteredData, key=itemgetter('person'))]
+
     gyrodata.writeMetadata(filteredData, options.output)
     
 if __name__ == '__main__':

@@ -11,19 +11,21 @@ def findActivityFolder(path, activity):
             return fullPath
     return None
 
-def parseMeta(path):
+def parseMeta(path, person, activityFolder):
     attributeMap = {
-            'Activity': 'activity',
-            'Gender': 'gender',
-            'Generation': 'age',
-            'Height(cm)': 'height',
-            'Weight(kg)': 'weight',
-            'TerminalPosition': 'position',
-            'TerminalMount': 'mount',
-            }
+        'Activity': 'activity',
+        'Gender': 'gender',
+        'Generation': 'age',
+        'Height(cm)': 'height',
+        'Weight(kg)': 'weight',
+        'TerminalPosition': 'position',
+        'TerminalMount': 'mount',
+    }
     data = {
-            'id': os.path.basename(path).replace(".meta", ""),
-            }
+        'id': os.path.basename(path).replace(".meta", ""),
+        'person': person,
+        'activityFolder': activityFolder,
+    }
     with open(path) as f:
         for line in f:
             parts = line.strip().split(':')
@@ -52,7 +54,8 @@ def getDataEntries(path):
     gyroFiles = {}
     metaData = []
     for dirpath, dirnames, filenames in os.walk(path):
-        if os.path.basename(dirpath).startswith("person"):
+        basename = os.path.basename(dirpath)
+        if basename.startswith("person"):
             for filename in filenames:
                 fullPath = os.path.join(dirpath, filename)
                 if filename.endswith("-acc.csv"):
@@ -60,7 +63,8 @@ def getDataEntries(path):
                 elif filename.endswith("-gyro.csv"):
                     gyroFiles[filename.replace("-gyro.csv", "")] = fullPath
                 elif filename.endswith(".meta"):
-                    metaData.append(parseMeta(fullPath))
+                    activityFolder = os.path.basename(os.path.dirname(dirpath))
+                    metaData.append(parseMeta(fullPath, basename, activityFolder))
     return formatMetadata(metaData, accFiles, gyroFiles)
 
 def main():

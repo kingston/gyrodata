@@ -4,15 +4,18 @@
 data-filters:
   activity: walk
   position: waist
+  activityFolder: walk
   # check for attribute existence
   weight: true
   accfile: true
   gyrofile: true
+  # check for unique people only
+  unique: false
 
 # Output variable configuration
 output:
-  variable: gender
-  is-bucketed: false
+  variable: weight
+  is-bucketed: true
   buckets:
     num: 5
 
@@ -21,7 +24,7 @@ validation:
   #  - holdout
   #  - k-fold
   #  - same (use train set as test)
-  type: holdout
+  type: k-fold
   # whether data should be randomly sorted first
   randomizeSort: true
   # seed for predictable results
