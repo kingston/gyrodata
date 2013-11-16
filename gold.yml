@@ -24,7 +24,7 @@ validation:
   #  - holdout
   #  - k-fold
   #  - same (use train set as test)
-  type: same
+  type: k-fold
   # whether data should be randomly sorted first
   randomizeSort: true
   # seed for predictable results
