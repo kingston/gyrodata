@@ -3,8 +3,10 @@
 import os, sys, yaml, random, math
 from optparse import OptionParser
 import gyrodata, datamodel
+import sklearn
 from sklearn import cross_validation
 from numpy import *
+from distutils.version import StrictVersion
 
 def most_common_count (lst):
     return max(((item, lst.count(item)) for item in set(lst)), key=lambda a: a[1])[1]
@@ -53,10 +55,16 @@ def runWithSameTrainTest(config, features, output):
 
 def runWithKFold(config, features, output):
     k = config['validation']['k-fold']['k']
-    if config['validation']['k-fold']['stratify']:
-        skf = cross_validation.StratifiedKFold(output, n_folds = k)
+    if StrictVersion(sklearn.__version__) > StrictVersion('0.12'):
+        if config['validation']['k-fold']['stratify']:
+            skf = cross_validation.StratifiedKFold(output, n_folds = k)
+        else:
+            skf = cross_validation.KFold(len(output), n_folds = k)
     else:
-        skf = cross_validation.KFold(len(output), n_folds = k)
+        if config['validation']['k-fold']['stratify']:
+            skf = cross_validation.StratifiedKFold(output, k)
+        else:
+            skf = cross_validation.KFold(len(output), k)
 
     X = array(features)
     Y = array(output)
