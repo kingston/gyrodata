@@ -12,12 +12,12 @@ def isValidEntry(entry, config):
     presentAttributes = ['accfile', 'gyrofile', 'weight', 'height']
     for attr in containsAttributes:
         if attr in filters:
-            if filters[attr] not in entry[attr]:
+            if filters[attr] and filters[attr] not in entry[attr]:
                 return False
 
     for attr in presentAttributes:
         if attr in filters:
-            if filters[attr] and not entry[attr]:
+            if filters[attr] and filters[attr] and not entry[attr]:
                 return False
     return True
 
