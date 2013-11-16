@@ -73,7 +73,7 @@ def main():
     # Generate meta file if needs be
     if options.meta or not os.path.exists("data/meta.csv"):
         print "Gathering metadata..."
-        safeRun("./extractMetadata.py -o data/meta.csv corpus")
+        safeRun("python extractMetadata.py -o data/meta.csv corpus")
     
     runData(config, options)
 
