@@ -22,14 +22,14 @@ def runData(config, options):
     outputCsv = prefix + "_output.csv"
 
     # Create filter data
-    safeRun("./filterMetadata.py -c %s -o %s data/meta.csv" % (options.config, filteredCsv))
+    safeRun("python filterMetadata.py -c %s -o %s data/meta.csv" % (options.config, filteredCsv))
 
     # Extract features and output
-    safeRun("./extractFeatures.py -c %s -o %s %s" % (options.config, featuresCsv, filteredCsv))
-    safeRun("./extractOutput.py -c %s -o %s %s" % (options.config, outputCsv, filteredCsv))
+    safeRun("python extractFeatures.py -c %s -o %s %s" % (options.config, featuresCsv, filteredCsv))
+    safeRun("python extractOutput.py -c %s -o %s %s" % (options.config, outputCsv, filteredCsv))
 
     # Test data
-    safeRun("./trainTest.py -c %s %s %s" % (options.config, featuresCsv, outputCsv))
+    safeRun("python trainTest.py -c %s %s %s" % (options.config, featuresCsv, outputCsv))
 
     # Remove all prefixed files
     safeRun("rm -f tmp/%s*" % prefix)
