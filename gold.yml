@@ -4,13 +4,20 @@
 data-filters:
   activity: walk
   position: waist
-  activityFolder: ~
+  activityFolder: walk
   # check for attribute existence
   weight: true
   accfile: true
   gyrofile: true
   # check for unique people only
   unique: true
+
+# Feature configuration
+features:
+  kingston: false
+  david: false
+  fanhal: false
+  max-point: true
 
 # Output variable configuration
 output:
