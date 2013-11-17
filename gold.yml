@@ -31,6 +31,7 @@ validation:
   #  - holdout
   #  - k-fold
   #  - same (use train set as test)
+  #  - loo (leave one out)
   type: k-fold
   # whether data should be randomly sorted first
   randomizeSort: true

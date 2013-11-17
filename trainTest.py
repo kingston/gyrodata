@@ -54,6 +54,21 @@ def trainTest(config, X, Y, testFeatures, testOutput, showBaseline=False):
 def runWithSameTrainTest(config, features, output):
     return trainTest(config, features, output, features, output, True)
 
+def runWithCrossValidation(config, features, output, skf):
+    X = array(features)
+    Y = array(output)
+    accuracies = []
+    for train_index, test_index in skf:
+        X_train, X_test = X[train_index], X[test_index]
+        Y_train, Y_test = Y[train_index], Y[test_index]
+
+        accuracies.append(trainTest(config, X_train, Y_train, X_test, Y_test))
+    return sum(accuracies) / len(accuracies)
+
+def runWithLeaveOneOut(config, features, output):
+    skf = cross_validation.LeaveOneOut(len(features))
+    return runWithCrossValidation(config, features, output, skf)
+
 def runWithKFold(config, features, output):
     k = config['validation']['k-fold']['k']
     if StrictVersion(sklearn.__version__) > StrictVersion('0.12'):
@@ -67,15 +82,7 @@ def runWithKFold(config, features, output):
         else:
             skf = cross_validation.KFold(len(output), k)
 
-    X = array(features)
-    Y = array(output)
-    accuracies = []
-    for train_index, test_index in skf:
-        X_train, X_test = X[train_index], X[test_index]
-        Y_train, Y_test = Y[train_index], Y[test_index]
-
-        accuracies.append(trainTest(config, X_train, Y_train, X_test, Y_test))
-    return sum(accuracies) / len(accuracies)
+    return runWithCrossValidation(config, features, output, skf)
 
 def runWithHoldout(config, features, output):
     n = len(features)
@@ -103,6 +110,8 @@ def runData(config, features, output):
         return runWithHoldout(config, features, output)
     elif validationType == "k-fold":
         return runWithKFold(config, features, output)
+    elif validationType == "loo":
+        return runWithLeaveOneOut(config, features, output)
     elif validationType == "same":
         return runWithSameTrainTest(config, features, output)
     else:
