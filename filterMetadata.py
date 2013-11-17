@@ -9,7 +9,7 @@ from operator import itemgetter
 def isValidEntry(entry, config):
     filters = config['data-filters']
     containsAttributes = ['activity', 'position', 'activityFolder']
-    presentAttributes = ['accfile', 'gyrofile', 'weight', 'height']
+    presentAttributes = ['accfile', 'gyrofile', 'weight', 'height', 'age']
     for attr in containsAttributes:
         if attr in filters:
             if filters[attr] and filters[attr] not in entry[attr]:
