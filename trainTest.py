@@ -33,7 +33,6 @@ def getModel(config):
 def trainTest(config, X, Y, testFeatures, testOutput, showBaseline=False):
     model = getModel(config)
     predicted = model(config, X, Y, testFeatures)
-    print predicted
     isDiscrete = model.isDiscrete
 
     if isDiscrete:
