@@ -49,18 +49,17 @@ def predictWithQDA(config, X, Y, testFeatures):
 
 @discreteResponse
 def predictWithSVC(config, X, Y, testFeatures):
-    clf = svm.SVC()
+    svcConfig = config.getConfig('model/svc')
+    kernel = svcConfig.get('kernel', 'rbf')
+    if kernel == 'sigmoid':
+        clf = svm.SVC(C=1.0, kernel='sigmoid', degree=2, gamma=1.0, coef0=0.0, shrinking=True, probability=False, tol=0.0001, cache_size=200, class_weight=None, verbose=False)
+    else:
+        clf = svm.SVC(kernel=kernel)
     clf.fit(X, Y)
     return clf.predict(testFeatures)
 
 @continuousResponse
 def predictWithSVR(config, X, Y, testFeatures):
     clf = svm.SVR()
-    clf.fit(X, Y)
-    return clf.predict(testFeatures)
-
-@discreteResponse    
-def predictWithSCVsigmoid(config, X, Y, testFeatures):
-    clf = svm.SVC(C=1.0, kernel='sigmoid', degree=2, gamma=1.0, coef0=0.0, shrinking=True, probability=False, tol=0.0001, cache_size=200, class_weight=None, verbose=False)
     clf.fit(X, Y)
     return clf.predict(testFeatures)
