@@ -23,6 +23,7 @@ def getModel(config):
         "lda": datamodel.predictWithLDA,
         "qda": datamodel.predictWithQDA,
         "svr": datamodel.predictWithSVR,
+        "svc-sigmoid": datamodel.predictWithSCVsigmoid,
     }
     if modelType in models:
         return models[modelType]
@@ -32,6 +33,7 @@ def getModel(config):
 def trainTest(config, X, Y, testFeatures, testOutput, showBaseline=False):
     model = getModel(config)
     predicted = model(config, X, Y, testFeatures)
+    print predicted
     isDiscrete = model.isDiscrete
 
     if isDiscrete:
