@@ -5,6 +5,7 @@ data-filters:
   activity: walk
   position: waist
   activityFolder: walk
+  #terminalMount: fixed
   # check for attribute existence
   age: true
   weight: true
