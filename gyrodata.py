@@ -2,7 +2,7 @@
 import os, csv
 
 def getAttributeList():
-    return ['activity', 'gender', 'age', 'height', 'weight', 'position', 'activityFolder', 'person', 'accfile', 'gyrofile']
+    return ['activity', 'gender', 'age', 'height', 'weight', 'position', 'mount', 'direction', 'activityFolder', 'person', 'accfile', 'gyrofile']
 
 def writeMetadata(data, path):
     with open(path, 'wb') as csvfile:

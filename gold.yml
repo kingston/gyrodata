@@ -5,7 +5,8 @@ data-filters:
   activity: walk
   position: waist
   activityFolder: walk
-  #terminalMount: fixed
+  #mount: fixed
+  #direction: front
   # check for attribute existence
   age: true
   weight: true

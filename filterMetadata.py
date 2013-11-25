@@ -8,7 +8,7 @@ from operator import itemgetter
 
 def isValidEntry(entry, config):
     filters = config['data-filters']
-    containsAttributes = ['activity', 'position', 'activityFolder', 'TerminalMount', 'AttachmentDirection']
+    containsAttributes = ['activity', 'position', 'activityFolder', 'mount', 'direction']
     presentAttributes = ['accfile', 'gyrofile', 'weight', 'height', 'age']
     for attr in containsAttributes:
         if attr in filters:
