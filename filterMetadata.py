@@ -8,8 +8,8 @@ from operator import itemgetter
 
 def isValidEntry(entry, config):
     filters = config['data-filters']
-    containsAttributes = ['activity', 'position', 'activityFolder']
-    presentAttributes = ['accfile', 'gyrofile', 'weight', 'height']
+    containsAttributes = ['activity', 'position', 'activityFolder', 'mount', 'direction']
+    presentAttributes = ['accfile', 'gyrofile', 'weight', 'height', 'age']
     for attr in containsAttributes:
         if attr in filters:
             if filters[attr] and filters[attr] not in entry[attr]:
@@ -54,6 +54,8 @@ def main():
     # filter by person
     if config['data-filters']['unique']:
         filteredData = [group.next() for key, group in groupby(filteredData, key=itemgetter('person'))]
+
+    print("Loaded %d entries!" % (len(filteredData)))
 
     gyrodata.writeMetadata(filteredData, options.output)
     

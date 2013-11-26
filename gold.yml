@@ -5,7 +5,10 @@ data-filters:
   activity: walk
   position: waist
   activityFolder: walk
+  #mount: fixed
+  #direction: front
   # check for attribute existence
+  age: true
   weight: true
   accfile: true
   gyrofile: true
@@ -53,3 +56,6 @@ model:
   # - svc (SVM)
   # - svr (SVM with regression)
   type: svc
+
+  svc:
+    kernel: rbf

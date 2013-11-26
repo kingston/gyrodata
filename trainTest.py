@@ -3,6 +3,7 @@
 import os, sys, yaml, random, math
 from optparse import OptionParser
 import gyrodata, datamodel
+from gyroconfig import GyroConfig
 import sklearn
 from sklearn import cross_validation
 from numpy import *
@@ -23,7 +24,6 @@ def getModel(config):
         "lda": datamodel.predictWithLDA,
         "qda": datamodel.predictWithQDA,
         "svr": datamodel.predictWithSVR,
-        "svc-sigmoid": datamodel.predictWithSCVsigmoid,
         "knn": datamodel.predictWithKNN,
     }
     if modelType in models:
@@ -71,14 +71,15 @@ def runWithLeaveOneOut(config, features, output):
     return runWithCrossValidation(config, features, output, skf)
 
 def runWithKFold(config, features, output):
-    k = config['validation']['k-fold']['k']
+    kConfig = config.getConfig('validation/k-fold')
+    k = kConfig.get('k', 10)
     if StrictVersion(sklearn.__version__) > StrictVersion('0.12'):
-        if config['validation']['k-fold']['stratify']:
+        if kConfig.get('stratify', False):
             skf = cross_validation.StratifiedKFold(output, n_folds = k)
         else:
             skf = cross_validation.KFold(len(output), n_folds = k)
     else:
-        if config['validation']['k-fold']['stratify']:
+        if kConfig.get('stratify', False):
             skf = cross_validation.StratifiedKFold(output, k)
         else:
             skf = cross_validation.KFold(len(output), k)
@@ -87,7 +88,7 @@ def runWithKFold(config, features, output):
 
 def runWithHoldout(config, features, output):
     n = len(features)
-    trainSize = config['validation']['holdout']['trainSize']
+    trainSize = config.get('validation/holdout/trainSize')
     sep = int(n * trainSize)
     trainFeatures = features[0:sep]
     testFeatures = features[sep:]
@@ -132,11 +133,7 @@ def main():
     if len(args) != 2:
         parser.error("wrong number of arguments")
 
-    try:
-        with open(options.config, 'r') as configFile:
-            config = yaml.load(configFile)
-    except IOError:
-        sys.exit("Unable to find configuration file " + options.config)
+    config = GyroConfig.load(options.config)
 
     features = gyrodata.readCsvData(args[0])
     output = gyrodata.readCsvData(args[1])

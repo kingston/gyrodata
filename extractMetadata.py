@@ -20,6 +20,7 @@ def parseMeta(path, person, activityFolder):
         'Weight(kg)': 'weight',
         'TerminalPosition': 'position',
         'TerminalMount': 'mount',
+        'AttachmentDirection': 'direction',
     }
     data = {
         'id': os.path.basename(path).replace(".meta", ""),
@@ -41,6 +42,11 @@ def parseMeta(path, person, activityFolder):
     if 'weight' not in data:
         data['weight'] = 0
     
+    # check for no mount/direction
+    if 'mount' not in data:
+        data['mount'] = ""
+    if 'direction' not in data:
+        data['direction'] = ""
     return data
 
 def formatMetadata(metaData, accFiles, gyroFiles):

@@ -31,6 +31,7 @@ def extractFeatures(entry, config):
             gyroData = array(readNumericData(entry['gyrofile']))
             features += gyroData.max(axis=0)[1:].tolist()
 
+    features += [entry['weight']]
     return features
 
 def main():
