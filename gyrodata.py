@@ -10,7 +10,9 @@ def writeMetadata(data, path):
         for entry in data:
             record = []
             for attr in getAttributeList():
-                record.append(entry[attr])
+                if attr not in entry:
+                    print entry
+                record.append(entry[attr])          
             metawriter.writerow(record)
 
 def readMetadata(path):

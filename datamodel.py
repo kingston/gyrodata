@@ -6,6 +6,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.lda import LDA
 from sklearn.qda import QDA
 from sklearn import svm
+from sklearn import neighbors
 
 # Function decorators for tagging methods
 
@@ -61,6 +62,12 @@ def predictWithSVR(config, X, Y, testFeatures):
 
 @discreteResponse    
 def predictWithSCVsigmoid(config, X, Y, testFeatures):
-    clf = svm.SVC(C=1.0, kernel='sigmoid', degree=2, gamma=1.0, coef0=0.0, shrinking=True, probability=False, tol=0.0001, cache_size=200, class_weight=None, verbose=False)
+    clf = svm.SVC(C=1.0, kernel='sigmoid', degree=2, gamma=3.0, coef0=0.0, shrinking=True, probability=False, tol=0.0001, cache_size=200, class_weight=None, verbose=False)
     clf.fit(X, Y)
+    return clf.predict(testFeatures)
+
+@discreteResponse
+def predictWithKNN(config, X, Y, testFeatures):
+    clf=neighbors.KNeighborsClassifier(4)
+    clf.fit(X,Y)
     return clf.predict(testFeatures)

@@ -24,6 +24,7 @@ def getModel(config):
         "qda": datamodel.predictWithQDA,
         "svr": datamodel.predictWithSVR,
         "svc-sigmoid": datamodel.predictWithSCVsigmoid,
+        "knn": datamodel.predictWithKNN,
     }
     if modelType in models:
         return models[modelType]
