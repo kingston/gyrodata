@@ -4,7 +4,7 @@
 data-filters:
   activity: walk
   position: waist
-  activityFolder: walk
+  activityFolder: gyroscoper
   #mount: fixed
   #direction: front
   # check for attribute existence
@@ -28,6 +28,8 @@ output:
   is-bucketed: true
   buckets:
     num: 3
+    manual: false
+    splits: [1,2,3]
 
 validation:
   # Type of data validation

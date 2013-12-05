@@ -39,8 +39,13 @@ def extractOutput(entry, metadata, config):
     isBucketed = outputConfig['is-bucketed']
     output = parseEntry(entry, variable)
     if isBucketed:
+        bucketConfig = outputConfig['buckets']
+        if bucketConfig['manual']:
+            splits = bucketConfig['splits']
+        else:
+            splits = metadata['splits']
         i = 0
-        for split in metadata['splits']:
+        for split in splits:
             if output <= split:
                 break
             i += 1
