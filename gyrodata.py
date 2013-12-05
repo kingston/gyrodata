@@ -32,3 +32,7 @@ def writeCsvData(data, path):
     with open(path, 'wb') as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=',')
         csvwriter.writerows(data)
+
+def readNumericData(path):
+    data = readCsvData("../" + path)
+    return [[float(x or 0) for x in l] for l in data]

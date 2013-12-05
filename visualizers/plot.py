@@ -1,13 +1,17 @@
 #!/usr/bin/env python
 
-import data
 import numpy as np
 import matplotlib.pyplot as plt
-import sys
+import sys, os, re
 
 import process
 
-dataPortion = 0.2
+dataPortion = 0.3
+
+# import gyrodata from parent directory
+sys.path.insert(1, os.path.join(sys.path[0], '..'))
+import gyrodata
+import data as plotdata
 
 def promptForEntry(meta):
     text = raw_input("Enter person ID to plot: ")
@@ -21,39 +25,50 @@ def promptForEntry(meta):
             text = raw_input("Invalid ID. Please try again: ")
 
 def plotEntry(entry):
-    accData = np.array(data.readNumericData(entry['accfile']))
-    gyroData = np.array(data.readNumericData(entry['gyrofile']))
+    accData = np.array(plotdata.readNumericData(entry['accfile']))
+    gyroData = np.array(plotdata.readNumericData(entry['gyrofile']))
 
     accData = accData[:len(accData) * dataPortion, :]
     gyroData = gyroData[:len(gyroData) * dataPortion, :]
 
     accData, gyroData = process.normalizeDatasets(accData, gyroData)
-    # absolute reference data
-    gyroData = process.absoluteReferenceAccData(accData, gyroData)
+    # process data
+    accData, gyroData = process.processData(accData, gyroData)
 
     # plot accelerometer/gyroscope
     X = accData[:, 0]
 
-    f, (ax1, ax2) = plt.subplots(2, 1, sharex=True)
-    ax1.set_title(entry['person'] + ' - accelerometer')
-    ax1.plot(X, accData[:, 1])
-    ax1.plot(X, accData[:, 2])
-    ax1.plot(X, accData[:, 3])
+    # extract sample number
+    #sample = re.search('[0-9]{5,7}', entry['accfile']).group(0)
+    sample = entry['person']
+
+    f, (ax1, ax2) = plt.subplots(2, 1) #, sharex=True)
+    ax1.set_title(entry['person'] + ' - ' + sample + ' - accelerometer')
+    ax1.plot(X, accData[:, 1], 'r', label='x')
+    ax1.plot(X, accData[:, 2], 'g', label='y')
+    ax1.plot(X, accData[:, 3], 'b', label='z')
+
+    ax1.legend()
 
     X = gyroData[:, 0]
-    ax2.set_title(entry['person'] + ' - gyroscope')
-    ax2.plot(X, gyroData[:, 1])
-    ax2.plot(X, gyroData[:, 2])
-    ax2.plot(X, gyroData[:, 3])
+    #sample = re.search('[0-9]{5,7}', entry['gyrofile']).group(0)
+    ax2.set_title(entry['person'] + ' - ' + sample + ' - gyroscope')
+    ax2.plot(X, gyroData[:, 1], 'r', label='x')
+    ax2.plot(X, gyroData[:, 2], 'g', label='y')
+    ax2.plot(X, gyroData[:, 3], 'b', label='z')
+
+    ax2.legend()
 
 def main():
-    metapath = "../data/meta.csv"
-    meta = data.readMetadata(metapath)
+    metapath = "../data/gyroscoper.csv"
+    meta = gyrodata.readMetadata(metapath)
 
     plt.ion()
 
-    filteredMeta = [entry for entry in meta if 'walk' in entry['activityFolder'] and 'waist' in entry['position'] and entry['gyrofile']]
+    filteredMeta = meta
+    #filteredMeta = [entry for entry in meta if 'walk' in entry['activityFolder'] and 'waist' in entry['position'] and entry['gyrofile']]
     for entry in filteredMeta:
+        plt.close()
         plt.clf()
         plotEntry(entry)
         plt.show()
@@ -62,6 +77,7 @@ def main():
             break
 
     while True:
+        plt.close()
         entry = promptForEntry(meta)
         plt.clf()
         plotEntry(entry)

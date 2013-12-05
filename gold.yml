@@ -4,7 +4,7 @@
 data-filters:
   activity: walk
   position: waist
-  activityFolder: walk
+  activityFolder: gyroscoper
   #mount: fixed
   #direction: front
   # check for attribute existence
@@ -14,6 +14,8 @@ data-filters:
   gyrofile: true
   # check for unique people only
   unique: true
+  # check for min records in files
+  minRecords: 200
 
 # Feature configuration
 features:
@@ -28,6 +30,8 @@ output:
   is-bucketed: true
   buckets:
     num: 3
+    manual: false
+    splits: [1,2,3]
 
 validation:
   # Type of data validation

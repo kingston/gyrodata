@@ -20,18 +20,18 @@ def isValidEntry(entry, config):
             if filters[attr] and filters[attr] and not entry[attr]:
                 return False
 
-    def checkValidFile(path, numKeys):
+    def checkValidFile(path, numKeys, minRecords):
             # check for valid values in acc file
             data = gyrodata.readCsvData(path)
-            if len(data) == 0:
+            if len(data) < minRecords:
                 return False
             # count all non-falsy keys
             keys = [len([e for e in l if e]) for l in data]
             return max(keys) == numKeys
 
-    if filters['accfile'] and not checkValidFile(entry['accfile'], 4):
+    if filters['accfile'] and not checkValidFile(entry['accfile'], 4, filters['minRecords']):
         return False
-    if filters['gyrofile'] and not checkValidFile(entry['gyrofile'], 4):
+    if filters['gyrofile'] and not checkValidFile(entry['gyrofile'], 4, filters['minRecords']):
         return False
     return True
 
