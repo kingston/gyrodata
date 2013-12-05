@@ -36,8 +36,18 @@ def trainTest(config, X, Y, testFeatures, testOutput, showBaseline=False):
     predicted = model(config, X, Y, testFeatures)
     isDiscrete = model.isDiscrete
 
+    print "Confusion matrix:"
+    confusion = zeros((3,3))
+    for i in xrange(len(predicted)):
+        confusion[predicted[i]][testOutput[i]]+=1
+    print confusion
+    print "Small marginal: " + "%.2f"%float(confusion[0][0]/confusion.sum(axis=0)[0])
+    print "Medium marginal: " + "%.2f"%float(confusion[1][1]/confusion.sum(axis=0)[1])
+    print "Large marginal: " + "%.2f"%float(confusion[2][2]/confusion.sum(axis=0)[2])
+
     if isDiscrete:
         numCorrect = len([i for i, j in zip(predicted, testOutput) if i == j])
+        
         if showBaseline:
             baseline = float(most_common_count(testOutput)) / len(testOutput)
             print "Baseline: " + "%.2f" % (baseline * 100) + "%"
