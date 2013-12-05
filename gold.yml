@@ -14,6 +14,8 @@ data-filters:
   gyrofile: true
   # check for unique people only
   unique: true
+  # check for min records in files
+  minRecords: 200
 
 # Feature configuration
 features:
