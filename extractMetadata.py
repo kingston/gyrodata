@@ -35,6 +35,7 @@ def parseMeta(path, person, activityFolder):
                 parts = [parts[0], parts[2]]
             if len(parts) == 2 and parts[0].strip() in attributeMap:
                 data[attributeMap[parts[0].strip()]] = parts[1].strip()
+
                 
     # Generation/weight is not present in 2011 data so set it to 0
     if 'age' not in data:
@@ -42,6 +43,14 @@ def parseMeta(path, person, activityFolder):
     if 'weight' not in data:
         data['weight'] = 0
     
+
+    # hack for gyroscoper data
+    if activityFolder == "gyroscoper":
+        data['mount'] = "free"
+        data['direction'] = "front"
+        data['activity'] = "walk"
+        data["position"] = "waist"
+
     # check for no mount/direction
     if 'mount' not in data:
         data['mount'] = ""
@@ -69,9 +78,9 @@ def getDataEntries(path):
     accFiles = {}
     gyroFiles = {}
     metaData = []
-    for dirpath, dirnames, filenames in os.walk(path):
+    for dirpath, dirnames, filenames in os.walk(path, followlinks=True):
         basename = os.path.basename(dirpath)
-        if basename.startswith("person"):
+        if basename.startswith("person") or basename == "gyroscoper":
             for filename in filenames:
                 fullPath = os.path.join(dirpath, filename)
                 if filename.endswith("-acc.csv"):
@@ -81,8 +90,13 @@ def getDataEntries(path):
                 elif filename.endswith(".csv"):
                     accFiles[filename.replace(".csv", "")] = fullPath
                 elif filename.endswith(".meta"):
-                    activityFolder = os.path.basename(os.path.dirname(dirpath))
-                    metaData.append(parseMeta(fullPath, basename, activityFolder))
+                    if basename == "gyroscoper":
+                        activityFolder = "gyroscoper"
+                        personName = filename.replace(".meta", "")
+                    else:
+                        activityFolder = os.path.basename(os.path.dirname(dirpath))
+                        personName = basename
+                    metaData.append(parseMeta(fullPath, personName, activityFolder))
     return formatMetadata(metaData, accFiles, gyroFiles)
 
 def main():
