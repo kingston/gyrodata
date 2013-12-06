@@ -78,7 +78,7 @@ def predictWithKNN(config, X, Y, testFeatures):
     
 @discreteResponse
 def predictWithPerceptron(config, X, Y, testFeatures):
-    clf = Perceptron()
+    clf = linear_model.Perceptron()
     clf.fit(X,Y)
     return clf.predict(testFeatures)
     
