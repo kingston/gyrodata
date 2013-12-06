@@ -35,28 +35,18 @@ def getModel(config):
     else:
         sys.exit("Unknown model type: " + modelType)
 
-def trainTest(config, X, Y, testFeatures, testOutput, showBaseline=False, showConfusion=False, preds=None, index=0):
+def trainTest(config, X, Y, testFeatures, testOutput, showBaseline=False, confusion=None):
     model = getModel(config)
     predicted = model(config, X, Y, testFeatures)
-    if preds is not None: preds[index]=predicted[0]
+    if confusion is not None:
+    	for i in xrange(len(predicted)):
+    		confusion[predicted[i]][testOutput[i]]+=1
     isDiscrete = model.isDiscrete
 
     
     
     numCorrect = len([i for i, j in zip(predicted, testOutput) if i == j])
     if isDiscrete:
-
-    	if showConfusion:
-	        print "Confusion matrix:"
-	        confusion = zeros((3,3))
-	        for i in xrange(len(predicted)):
-	            confusion[predicted[i]][testOutput[i]]+=1
-	        print confusion
-	        print "Small marginal: " + "%.2f"%float(confusion[0][0]/confusion.sum(axis=0)[0] * 100) + "%"
-	        print "Medium marginal: " + "%.2f"%float(confusion[1][1]/confusion.sum(axis=0)[1] * 100) + "%"
-	        print "Large marginal: " + "%.2f"%float(confusion[2][2]/confusion.sum(axis=0)[2] * 100) + "%"
-	        
-        
         if showBaseline:
             counts = zeros(3)
             for i in xrange(3):
@@ -79,7 +69,7 @@ def trainTest(config, X, Y, testFeatures, testOutput, showBaseline=False, showCo
 def runWithSameTrainTest(config, features, output):
     return trainTest(config, features, output, features, output, True)
 
-def runWithCrossValidation(config, features, output, skf, preds=None):
+def runWithCrossValidation(config, features, output, skf, confusion=None):
     X = array(features)
     Y = array(output)
     accuracies = []
@@ -87,17 +77,14 @@ def runWithCrossValidation(config, features, output, skf, preds=None):
         X_train, X_test = X[train_index], X[test_index]
         Y_train, Y_test = Y[train_index], Y[test_index]
 
-        accuracies.append(trainTest(config, X_train, Y_train, X_test, Y_test, preds=preds, index=test_index))
+        accuracies.append(trainTest(config, X_train, Y_train, X_test, Y_test, confusion=confusion))
     return sum(accuracies) / len(accuracies)
 
 def runWithLeaveOneOut(config, features, output):
     skf = cross_validation.LeaveOneOut(len(features))
-    predicted = zeros(len(output))
-    accuracy = runWithCrossValidation(config, features, output, skf, preds=predicted)
-    print "Confusion matrix:"
     confusion = zeros((3,3))
-    for i in xrange(len(predicted)):
-        confusion[predicted[i]][output[i]]+=1
+    accuracy = runWithCrossValidation(config, features, output, skf, confusion=confusion)
+    print "Confusion matrix:"
     print confusion
     print "Small marginal: " + "%.2f"%float(confusion[0][0]/confusion.sum(axis=0)[0] * 100) + "%"
     print "Medium marginal: " + "%.2f"%float(confusion[1][1]/confusion.sum(axis=0)[1] * 100) + "%"
@@ -118,7 +105,14 @@ def runWithKFold(config, features, output):
         else:
             skf = cross_validation.KFold(len(output), k)
 
-    return runWithCrossValidation(config, features, output, skf)
+    confusion=zeros((3,3))
+    accuracy = runWithCrossValidation(config, features, output, skf, confusion=confusion)
+    print "Confusion matrix:"
+    print confusion
+    print "Small marginal: " + "%.2f"%float(confusion[0][0]/confusion.sum(axis=0)[0] * 100) + "%"
+    print "Medium marginal: " + "%.2f"%float(confusion[1][1]/confusion.sum(axis=0)[1] * 100) + "%"
+    print "Large marginal: " + "%.2f"%float(confusion[2][2]/confusion.sum(axis=0)[2] * 100) + "%"
+    return accuracy
 
 def runWithHoldout(config, features, output):
     n = len(features)
@@ -129,7 +123,14 @@ def runWithHoldout(config, features, output):
     trainOutput = output[0:sep]
     testOutput = output[sep:]
 
-    return trainTest(config, trainFeatures, trainOutput, testFeatures, testOutput, True, showConfusion=True)
+    confusion=zeros((3,3))
+    accuracy = trainTest(config, trainFeatures, trainOutput, testFeatures, testOutput, True, confusion=confusion)
+    print "Confusion matrix:"
+    print confusion
+    print "Small marginal: " + "%.2f"%float(confusion[0][0]/confusion.sum(axis=0)[0] * 100) + "%"
+    print "Medium marginal: " + "%.2f"%float(confusion[1][1]/confusion.sum(axis=0)[1] * 100) + "%"
+    print "Large marginal: " + "%.2f"%float(confusion[2][2]/confusion.sum(axis=0)[2] * 100) + "%"
+    return accuracy
 
 def runData(config, features, output):
     validationSettings = config['validation']
