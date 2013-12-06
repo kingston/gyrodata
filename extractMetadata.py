@@ -30,14 +30,27 @@ def parseMeta(path, person, activityFolder):
     with open(path) as f:
         for line in f:
             parts = line.strip().split(':')
+            # Weird data in 2011
+            if len(parts) == 3:
+                parts = [parts[0], parts[2]]
             if len(parts) == 2 and parts[0].strip() in attributeMap:
                 data[attributeMap[parts[0].strip()]] = parts[1].strip()
+
+                
+    # Generation/weight is not present in 2011 data so set it to 0
+    if 'age' not in data:
+        data['age'] = 0
+    if 'weight' not in data:
+        data['weight'] = 0
+    
+
     # hack for gyroscoper data
     if activityFolder == "gyroscoper":
         data['mount'] = "free"
         data['direction'] = "front"
         data['activity'] = "walk"
         data["position"] = "waist"
+
     # check for no mount/direction
     if 'mount' not in data:
         data['mount'] = ""
@@ -74,6 +87,8 @@ def getDataEntries(path):
                     accFiles[filename.replace("-acc.csv", "")] = fullPath
                 elif filename.endswith("-gyro.csv"):
                     gyroFiles[filename.replace("-gyro.csv", "")] = fullPath
+                elif filename.endswith(".csv"):
+                    accFiles[filename.replace(".csv", "")] = fullPath
                 elif filename.endswith(".meta"):
                     if basename == "gyroscoper":
                         activityFolder = "gyroscoper"

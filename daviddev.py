@@ -1,4 +1,5 @@
 from numpy import *
+<<<<<<< HEAD
 import scipy
 from scipy import signal
 from scipy import fftpack
@@ -7,7 +8,9 @@ import statsmodels.tsa.arima_model as ap
 import matplotlib.pyplot as plt
 import time
 import pylab
-#import spectral
+from scipy import signal
+import gyrodata
+import statsmodels.tsa.arima_model as ap
 
 def readNumericData(path):
     data = gyrodata.readCsvData(path)
@@ -16,7 +19,6 @@ def readNumericData(path):
 def extractFeatures(features, entry, config):
     #print scipy.version.version
     if config['data-filters']['accfile']:
-        
         accData = array(readNumericData(entry['accfile']))
         #accData = accData[120:(len(accData[:,0])-50),:]
         features += accData.mean(axis=0)[1:].tolist()
@@ -90,16 +92,25 @@ def extractFeatures(features, entry, config):
         '''
         widths = arange(1, 4)
         peakind = signal.find_peaks_cwt(totalAcc, widths)
-
         x=[]
         x.append(peakind[1] - peakind[0])
         for i in range(2,len(peakind)):
             x.append(peakind[i]-peakind[i-1])
         features+=(mean(x))
-
         features += sum(abs(signal.cwt(totalAcc, wavelet, widths)))
-
-
+        #features+=((signal.cwt(totalAcc,wavelet,widths))[1,:]).tolist()
+        #features=x
+        features += sum(abs(signal.cwt(totalAcc, wavelet, widths)))
+        #print features
+        #Pxx_den = signal.welch(totalAcc, 100, nperseg=1024)
+        #features+=mean(square(Pxx_den))
+        '''
+        '''
+        model = ap.ARMA(totalAcc)
+        result=model.fit(order=(2,1),trend='c',disp=-1)
+        features+=sum(result.params)
+        '''
+        '''
         seqLen = float(size(totalAcc))
         features+=(size(totalAcc[totalAcc>=buckets[-1]])/seqLen)
         for j in range(size(buckets)-1):
@@ -130,10 +141,7 @@ def extractFeatures(features, entry, config):
         #features += [abs(sum(meanFourier))] # Coefficients sum
         
 
-    '''
     if config['data-filters']['gyrofile']:
-        
-        
         gyroData = array(readNumericData(entry['gyrofile']))
         #gyroData = gyroData[120:(len(gyroData[:,0])-50),:]
         features += gyroData.mean(axis=0)[1:].tolist()
@@ -204,6 +212,9 @@ def extractFeatures(features, entry, config):
         features.append(mean(bodyJerkZ))
         features.append(std(bodyJerkZ))
         
+        buckets = linspace(0, 2, num=5)
+        features += gyroData.mean(axis=0)[1:].tolist()
+        features += gyroData.std(axis=0)[1:].tolist()
         
         totalGyro = sqrt((square(gyroData[:,1]) + square(gyroData[:,2]) + square(gyroData[:,3])))
         seqLen = float(size(totalGyro))
@@ -212,4 +223,3 @@ def extractFeatures(features, entry, config):
             upperBound = totalGyro<buckets[j+1]
             lowerBound = totalGyro>=buckets[j]
             features.append(size(totalGyro[lowerBound & upperBound])/seqLen)
-    '''
