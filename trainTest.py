@@ -13,6 +13,17 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import csv
 
+metadataPath = None
+cachedData = None
+def getMetadata():
+    if metadataPath is None:
+        return None
+    global cachedData
+    if not cachedData:
+        data = gyrodata.readMetadata(metadataPath)
+        cachedData = dict(zip([e['id'] for e in data], data))
+    return cachedData
+
 def most_common_count (lst):
     return max(((item, lst.count(item)) for item in set(lst)), key=lambda a: a[1])[1]
 
@@ -39,9 +50,25 @@ def getModel(config):
     else:
         sys.exit("Unknown model type: " + modelType)
 
+# use only the first value of the output (excluding the ID) by default
+def normalizeOutput(config, output):
+    model = getModel(config)
+    if model.isDiscrete:
+        output = [int(l[1]) for l in output]
+    else:
+        output = [float(l[1]) for l in output]
+    return output
+
 def trainTest(config, X, Y, testFeatures, testOutput, showBaseline=False, confusion=None):
+    trainIDs = [l[0] for l in Y]
+    testIDs = [l[0] for l in testOutput]
+
+    Y = normalizeOutput(config, Y)
+    testOutput = normalizeOutput(config, testOutput)
+
     model = getModel(config)
     predicted = model(config, X, Y, testFeatures)
+    isDiscrete = model.isDiscrete
     if confusion is not None:
     	for i in xrange(len(predicted)):
     		confusion[predicted[i]][testOutput[i]]+=1
@@ -87,6 +114,22 @@ def trainTest(config, X, Y, testFeatures, testOutput, showBaseline=False, confus
     '''
     
     numCorrect = len([i for i, j in zip(predicted, testOutput) if i == j])
+    reportConfig = config.getConfig('report')
+    if reportConfig.get('showIncorrect', False):
+        data = getMetadata()
+        for i in xrange(len(testOutput)):
+            if testOutput[i] != predicted[i]:
+                entry = data[testIDs[i]]
+                output = "Incorrect entry:"
+                output += " prediction=" + str(predicted[i])
+                output += " output=" + str(testOutput[i])
+                output += " ("
+                attrOutput = ""
+                for attr in reportConfig.get('incorrectAttrs', []):
+                    attrOutput += "," + attr + "=" + entry[attr]
+                output += attrOutput.strip(',')
+                output += ")"
+                print output
     if isDiscrete:
         if showBaseline:
             counts = zeros(3)
@@ -137,12 +180,12 @@ def runWithKFold(config, features, output):
     k = kConfig.get('k', 10)
     if StrictVersion(sklearn.__version__) > StrictVersion('0.12'):
         if kConfig.get('stratify', False):
-            skf = cross_validation.StratifiedKFold(output, n_folds = k)
+            skf = cross_validation.StratifiedKFold(normalizeOutput(config, output), n_folds = k)
         else:
             skf = cross_validation.KFold(len(output), n_folds = k)
     else:
         if kConfig.get('stratify', False):
-            skf = cross_validation.StratifiedKFold(output, k)
+            skf = cross_validation.StratifiedKFold(normalizeOutput(config, output), k)
         else:
             skf = cross_validation.KFold(len(output), k)
 
@@ -196,7 +239,7 @@ def runData(config, features, output):
         sys.exit("Unknown validation type: " + validationType)
 
 def main():
-    parser = OptionParser(usage="usage: %prog [options] feature_file output_file")
+    parser = OptionParser(usage="usage: %prog [options] feature_file output_file meta_file")
 
     parser.add_option("-c", "--config-file",
             action="store",
@@ -206,21 +249,20 @@ def main():
 
     (options, args) = parser.parse_args()
 
-    if len(args) != 2:
+    if len(args) != 3:
         parser.error("wrong number of arguments")
 
     config = GyroConfig.load(options.config)
 
     features = gyrodata.readCsvData(args[0])
     output = gyrodata.readCsvData(args[1])
+    # global variable for simplicity
+    global metadataPath
+    metadataPath = args[2]
     model = getModel(config)
 
     # normalize features/output (may be false assumption)
     features = [[float(x) for x in l] for l in features]
-    if model.isDiscrete:
-        output = [int(l[0]) for l in output]
-    else:
-        output = [float(l[0]) for l in output]
 
     print ""
     accuracy = runData(config, features, output)

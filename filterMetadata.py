@@ -8,8 +8,15 @@ from operator import itemgetter
 
 def isValidEntry(entry, config):
     filters = config['data-filters']
+    identicalAttributes = ['gender']
     containsAttributes = ['activity', 'position', 'activityFolder', 'mount', 'direction']
     presentAttributes = ['accfile', 'gyrofile', 'weight', 'height', 'age']
+
+    for attr in identicalAttributes:
+        if attr in filters:
+            if filters[attr] and filters[attr] != entry[attr]:
+                return False
+
     for attr in containsAttributes:
         if attr in filters:
             if filters[attr] and filters[attr] not in entry[attr]:

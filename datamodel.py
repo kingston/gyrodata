@@ -82,13 +82,12 @@ def predictWithPerceptron(config, X, Y, testFeatures):
     clf.fit(X,Y)
     return clf.predict(testFeatures)
 
-
 @discreteResponse
 def predictWithAdaBoost(config, X, Y, testFeatures):
     clf = AdaBoostClassifier(n_estimators=100)
     clf.fit(X,Y)
     return clf.predict(testFeatures)
-   
+
 @continuousResponse
 def predictWithLasso(config, X, Y,testFeatures):
     #lasso = linear_model.LassoCV(eps=0.01, n_alphas=500, alphas=None, fit_intercept=True, normalize=False, precompute='auto', max_iter=10000, tol=0.0001, copy_X=True, cv=None, verbose=False)

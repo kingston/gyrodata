@@ -31,6 +31,7 @@ def runData(config, options):
     # Test data
     safeRun("./my-env/bin/python trainTest.py -c %s %s %s" % (options.config, featuresCsv, outputCsv))
 
+
     # Remove all prefixed files
     safeRun("rm -f tmp/%s*" % prefix)
 
