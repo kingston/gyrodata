@@ -15,14 +15,14 @@ data-filters:
   # check for unique people only
   unique: true
   # check for min records in files
-  minRecords: 200
+  minRecords: 250
 
 # Feature configuration
 features:
   kingston: false
-  david: false
+  david: true
   fanhal: false
-  max-point: true
+  max-point: false
 
 # Output variable configuration
 output:
@@ -32,6 +32,8 @@ output:
     num: 3
     manual: false
     splits: [1,2,3]
+    # whether to print out the splits used
+    printSplits: true
 
 validation:
   # Type of data validation
@@ -49,6 +51,13 @@ validation:
   k-fold:
     k: 10
     stratify: true
+
+report:
+  # the output to report
+  # show the incorrectly classified results
+  showIncorrect: true
+  # attributes to show from incorrect entries
+  incorrectAttrs: ['weight']
 
 model:
   # Type of model to run it on

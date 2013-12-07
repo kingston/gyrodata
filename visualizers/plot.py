@@ -6,7 +6,7 @@ import sys, os, re
 
 import process
 
-dataPortion = 0.3
+dataPortion = 1
 
 # import gyrodata from parent directory
 sys.path.insert(1, os.path.join(sys.path[0], '..'))

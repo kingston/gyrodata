@@ -29,7 +29,7 @@ def runData(config, options):
     safeRun("python extractOutput.py -c %s -o %s %s" % (options.config, outputCsv, filteredCsv))
 
     # Test data
-    safeRun("python trainTest.py -c %s %s %s" % (options.config, featuresCsv, outputCsv))
+    safeRun("python trainTest.py -c %s %s %s %s" % (options.config, featuresCsv, outputCsv, filteredCsv))
 
     # Remove all prefixed files
     safeRun("rm -f tmp/%s*" % prefix)
