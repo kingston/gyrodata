@@ -10,6 +10,8 @@ def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for x in range(size))
 
 def safeRun(command):
+    if 'PYTHON_FOLDER' in os.environ and command.startswith('python '):
+        command = os.environ['PYTHON_FOLDER'] + command
     r = os.system(command)
     if r != 0:
         sys.exit("Error running command: " + command)
