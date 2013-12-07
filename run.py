@@ -22,14 +22,14 @@ def runData(config, options):
     outputCsv = prefix + "_output.csv"
 
     # Create filter data
-    safeRun("python filterMetadata.py -c %s -o %s data/meta.csv" % (options.config, filteredCsv))
+    safeRun("./my-env/bin/python filterMetadata.py -c %s -o %s data/meta.csv" % (options.config, filteredCsv))
 
     # Extract features and output
-    safeRun("python extractFeatures.py -c %s -o %s %s" % (options.config, featuresCsv, filteredCsv))
-    safeRun("python extractOutput.py -c %s -o %s %s" % (options.config, outputCsv, filteredCsv))
+    safeRun("./my-env/bin/python extractFeatures.py -c %s -o %s %s" % (options.config, featuresCsv, filteredCsv))
+    safeRun("./my-env/bin/python extractOutput.py -c %s -o %s %s" % (options.config, outputCsv, filteredCsv))
 
     # Test data
-    safeRun("python trainTest.py -c %s %s %s" % (options.config, featuresCsv, outputCsv))
+    safeRun("./my-env/bin/python trainTest.py -c %s %s %s" % (options.config, featuresCsv, outputCsv))
 
     # Remove all prefixed files
     safeRun("rm -f tmp/%s*" % prefix)
@@ -73,7 +73,7 @@ def main():
     # Generate meta file if needs be
     if options.meta or not os.path.exists("data/meta.csv"):
         print "Gathering metadata..."
-        safeRun("python extractMetadata.py -o data/meta.csv corpus")
+        safeRun("./my-env/bin/python extractMetadata.py -o data/meta.csv corpus")
     
     runData(config, options)
 
