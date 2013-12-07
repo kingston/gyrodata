@@ -37,7 +37,7 @@ def getModel(config):
         "svr": datamodel.predictWithSVR,
         "knn": datamodel.predictWithKNN,
         "perceptron": datamodel.predictWithPerceptron,
-        #"AdaBoost": datamodel.predictWithAdaBoost,
+        "AdaBoost": datamodel.predictWithAdaBoost,
         "lasso": datamodel.predictWithLasso,
         "gradient-boosting": datamodel.predictWithGradientBoosting,
     }

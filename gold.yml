@@ -4,7 +4,7 @@
 data-filters:
   activity: walk
   position: waist
-  activityFolder: gyroscoper
+  activityFolder: ~
   #mount: fixed
   #direction: front
   # check for attribute existence
@@ -26,8 +26,8 @@ features:
 
 # Output variable configuration
 output:
-  variable: weight
-  is-bucketed: true
+  variable: gender
+  is-bucketed: false
   buckets:
     num: 3
     manual: false
@@ -57,7 +57,7 @@ report:
   # show the incorrectly classified results
   showIncorrect: true
   # attributes to show from incorrect entries
-  incorrectAttrs: ['weight']
+  incorrectAttrs: ['gender', 'weight']
 
 model:
   # Type of model to run it on
@@ -68,7 +68,8 @@ model:
   # - qda (Quadratic Discriminant Analysis)
   # - svc (SVM)
   # - svr (SVM with regression)
-  type: svc
+  # - AdaBoost (ada boost)
+  type: AdaBoost
 
   svc:
     kernel: rbf
