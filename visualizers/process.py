@@ -46,7 +46,5 @@ def processData(accData, gyroData):
     # interpolate gyro data
     yGyro = np.interp(accData[:, 0], gyroData[:, 0], gyroData[:, 2])
     zGyro = np.interp(accData[:, 0], gyroData[:, 0], gyroData[:, 3])
-    
-
 
     return (accData, gyroData)

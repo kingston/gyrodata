@@ -5,6 +5,7 @@ data-filters:
   activity: walk
   position: waist
   activityFolder: ~
+  #gender: male
   #mount: fixed
   #direction: front
   # check for attribute existence
