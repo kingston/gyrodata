@@ -26,7 +26,7 @@ def getModel(config):
         "svr": datamodel.predictWithSVR,
         "knn": datamodel.predictWithKNN,
         "perceptron": datamodel.predictWithPerceptron,
-        #"AdaBoost": datamodel.predictWithAdaBoost,
+        "AdaBoost": datamodel.predictWithAdaBoost,
         "lasso": datamodel.predictWithLasso,
         "gradient-boosting": datamodel.predictWithGradientBoosting,
     }
@@ -42,8 +42,6 @@ def trainTest(config, X, Y, testFeatures, testOutput, showBaseline=False, confus
     	for i in xrange(len(predicted)):
     		confusion[predicted[i]][testOutput[i]]+=1
     isDiscrete = model.isDiscrete
-
-    
     
     numCorrect = len([i for i, j in zip(predicted, testOutput) if i == j])
     if isDiscrete:
@@ -83,6 +81,7 @@ def runWithCrossValidation(config, features, output, skf, confusion=None):
 def runWithLeaveOneOut(config, features, output):
     skf = cross_validation.LeaveOneOut(len(features))
     confusion = zeros((3,3))
+    predicted=zeros(len(output))
     accuracy = runWithCrossValidation(config, features, output, skf, confusion=confusion)
     print "Confusion matrix:"
     print confusion
