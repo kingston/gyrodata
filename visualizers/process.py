@@ -3,6 +3,8 @@ import numpy as np
 import scipy
 from scipy import integrate, signal
 import math
+from math import *
+from numpy.linalg import inv
 
 def filterByTime(start, end, data):
     return data[(data[:, 0] >= start) & (data[:, 0] <= end)]
@@ -60,7 +62,26 @@ def cleanData(accData, gyroData):
     return normalizeDatasets(accData, gyroData)
 
 def processData(accData, gyroData):
+    gyro = []
+    for i in range(3):
+        # interpolate data with accelerometer data and convert to radians
+        gyro.append(np.interp(accData[:, 0], gyroData[:, 0], gyroData[:, i + 1]) / 360 * 2 * math.pi)
+    gyroData = np.column_stack((accData[:, 0], gyro[0], gyro[1], gyro[2]))
+
+    for i in range(len(accData)):
+        tx = gyroData[i, 1]
+        ty = gyroData[i, 2]
+        tz = gyroData[i, 3]
+        Rx = np.array([[1,0,0], [0, cos(tx), -sin(tx)], [0, sin(tx), cos(tx)]])
+        Ry = np.array([[cos(ty), 0, -sin(ty)], [0, 1, 0], [sin(ty), 0, cos(ty)]])
+        Rz = np.array([[cos(tz), -sin(tz), 0], [sin(tz), cos(tz), 0], [0,0,1]])
+        R = np.dot(Rx, np.dot(Ry, Rz))
+
+        vec = (accData[i, 1], accData[i, 2], accData[i, 3])
+        (accData[i, 1], accData[i, 2], accData[i, 3]) = np.dot(inv(R), vec)
+
     return (accData, gyroData)
+
     # reinterpolate acceleration data into even samples
     minTime = accData[:, 0].min()
     maxTime = accData[:, 0].max()
