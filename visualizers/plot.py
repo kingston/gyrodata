@@ -37,6 +37,7 @@ def plotEntry(entry):
 
     # plot accelerometer/gyroscope
     X = accData[:, 0]
+    X = range(1,len(accData[:,0])+1)
 
     # extract sample number
     #sample = re.search('[0-9]{5,7}', entry['accfile']).group(0)
@@ -52,11 +53,12 @@ def plotEntry(entry):
     ax1.legend()
 
     X = gyroData[:, 0]
+    X = range(1,len(gyroData[:,0])+1)
     #sample = re.search('[0-9]{5,7}', entry['gyrofile']).group(0)
     ax2.set_title(entry['person'] + ' - ' + sample + ' - gyroscope')
-    ax2.plot(X, gyroData[:, 1], 'r', label='x')
+    #ax2.plot(X, gyroData[:, 1], 'r', label='x')
     ax2.plot(X, gyroData[:, 2], 'g', label='y')
-    ax2.plot(X, gyroData[:, 3], 'b', label='z')
+    #ax2.plot(X, gyroData[:, 3], 'b', label='z')
 
     ax2.legend()
 

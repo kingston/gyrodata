@@ -12,6 +12,7 @@ from sklearn.multiclass import OneVsRestClassifier
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.grid_search import GridSearchCV
 from sklearn.ensemble import GradientBoostingClassifier
+import sklearn
 
 # Function decorators for tagging methods
 
@@ -43,13 +44,14 @@ def predictWithRandomForest(config, X, Y, testFeatures):
 
 @discreteResponse
 def predictWithLDA(config, X, Y, testFeatures):
-    clf = LDA(priors=[.5,.5])
+    #clf = LDA()
+    clf = LDA(priors=[.35,.32,.33])
     clf.fit(X, Y)
     return clf.predict(testFeatures)
 
 @discreteResponse
 def predictWithQDA(config, X, Y, testFeatures):
-    clf = QDA(priors=[.5,.5])
+    clf = QDA(priors=[.9,.05,.05])
     clf.fit(X, Y)
     return clf.predict(testFeatures)
 
