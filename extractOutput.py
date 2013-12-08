@@ -31,6 +31,9 @@ def extractMetadata(data, config):
         numOutputs = len(outputs)
         numBuckets = bucketConfig['num']
         metadata['splits'] = [outputs[i * (numOutputs / numBuckets)] for i in range(1, numBuckets)]
+        if bucketConfig.get('printSplits', False):
+            print ""
+            print "Splits: " + ",".join([str(s) for s in metadata["splits"]])
     return metadata
 
 def extractOutput(entry, metadata, config):
@@ -40,7 +43,7 @@ def extractOutput(entry, metadata, config):
     output = parseEntry(entry, variable)
     if isBucketed:
         bucketConfig = outputConfig['buckets']
-        if bucketConfig['manual']:
+        if bucketConfig.get('manual', False):
             splits = bucketConfig['splits']
         else:
             splits = metadata['splits']
@@ -50,7 +53,8 @@ def extractOutput(entry, metadata, config):
                 break
             i += 1
         output = i
-    return [output]
+    # include ID of entry at the beginning for reference
+    return [entry['id'], output]
 
 def main():
     parser = OptionParser(usage="usage: %prog [options] data")

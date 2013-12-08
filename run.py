@@ -10,6 +10,8 @@ def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for x in range(size))
 
 def safeRun(command):
+    if 'PYTHON_FOLDER' in os.environ and command.startswith('python '):
+        command = os.environ['PYTHON_FOLDER'] + command
     r = os.system(command)
     if r != 0:
         sys.exit("Error running command: " + command)
@@ -22,14 +24,14 @@ def runData(config, options):
     outputCsv = prefix + "_output.csv"
 
     # Create filter data
-    safeRun("./env/bin/python filterMetadata.py -c %s -o %s data/meta.csv" % (options.config, filteredCsv))
+    safeRun("python filterMetadata.py -c %s -o %s data/meta.csv" % (options.config, filteredCsv))
 
     # Extract features and output
-    safeRun("./env/bin/python extractFeatures.py -c %s -o %s %s" % (options.config, featuresCsv, filteredCsv))
-    safeRun("./env/bin/python extractOutput.py -c %s -o %s %s" % (options.config, outputCsv, filteredCsv))
+    safeRun("python extractFeatures.py -c %s -o %s %s" % (options.config, featuresCsv, filteredCsv))
+    safeRun("python extractOutput.py -c %s -o %s %s" % (options.config, outputCsv, filteredCsv))
 
     # Test data
-    safeRun("./env/bin/python trainTest.py -c %s %s %s" % (options.config, featuresCsv, outputCsv))
+    safeRun("python trainTest.py -c %s %s %s %s" % (options.config, featuresCsv, outputCsv, filteredCsv))
 
     # Remove all prefixed files
     safeRun("rm -f tmp/%s*" % prefix)

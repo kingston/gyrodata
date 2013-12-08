@@ -74,7 +74,7 @@ def predictWithSVR(config, X, Y, testFeatures):
 
 @discreteResponse
 def predictWithKNN(config, X, Y, testFeatures):
-    clf=neighbors.KNeighborsClassifier(4)
+    clf=neighbors.KNeighborsClassifier(3)
     clf.fit(X,Y)
     return clf.predict(testFeatures)
     
