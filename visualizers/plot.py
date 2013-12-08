@@ -31,9 +31,9 @@ def plotEntry(entry):
     accData = accData[:len(accData) * dataPortion, :]
     gyroData = gyroData[:len(gyroData) * dataPortion, :]
 
-    accData, gyroData = process.normalizeDatasets(accData, gyroData)
+    accData, gyroData = process.cleanData(accData, gyroData)
     # process data
-    accData, gyroData = process.processData(accData, gyroData)
+    #accData, gyroData = process.processData(accData, gyroData)
 
     # plot accelerometer/gyroscope
     X = accData[:, 0]
@@ -41,9 +41,10 @@ def plotEntry(entry):
     # extract sample number
     #sample = re.search('[0-9]{5,7}', entry['accfile']).group(0)
     sample = entry['person']
+    print entry
 
     f, (ax1, ax2) = plt.subplots(2, 1) #, sharex=True)
-    ax1.set_title(entry['person'] + ' - ' + sample + ' - accelerometer')
+    ax1.set_title(entry['device'] + ' - ' + sample + ' - accelerometer')
     ax1.plot(X, accData[:, 1], 'r', label='x')
     ax1.plot(X, accData[:, 2], 'g', label='y')
     ax1.plot(X, accData[:, 3], 'b', label='z')
