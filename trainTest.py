@@ -153,11 +153,12 @@ def runWithKFold(config, features, output):
 
     confusion=zeros((3,3))
     accuracy = runWithCrossValidation(config, features, output, skf, confusion=confusion)
-    print "Confusion matrix:"
-    print confusion
-    print "Small marginal: " + "%.2f"%float(confusion[0][0]/confusion.sum(axis=0)[0] * 100) + "%"
-    print "Medium marginal: " + "%.2f"%float(confusion[1][1]/confusion.sum(axis=0)[1] * 100) + "%"
-    print "Large marginal: " + "%.2f"%float(confusion[2][2]/confusion.sum(axis=0)[2] * 100) + "%"
+    if config.getConfig('report/showConfusion'):
+        print "Confusion matrix:"
+        print confusion
+        print "Small marginal: " + "%.2f"%float(confusion[0][0]/confusion.sum(axis=0)[0] * 100) + "%"
+        print "Medium marginal: " + "%.2f"%float(confusion[1][1]/confusion.sum(axis=0)[1] * 100) + "%"
+        print "Large marginal: " + "%.2f"%float(confusion[2][2]/confusion.sum(axis=0)[2] * 100) + "%"
     return accuracy
 
 def runWithHoldout(config, features, output):
@@ -171,11 +172,12 @@ def runWithHoldout(config, features, output):
 
     confusion=zeros((3,3))
     accuracy = trainTest(config, trainFeatures, trainOutput, testFeatures, testOutput, True, confusion=confusion)
-    print "Confusion matrix:"
-    print confusion
-    print "Small marginal: " + "%.2f"%float(confusion[0][0]/confusion.sum(axis=0)[0] * 100) + "%"
-    print "Medium marginal: " + "%.2f"%float(confusion[1][1]/confusion.sum(axis=0)[1] * 100) + "%"
-    print "Large marginal: " + "%.2f"%float(confusion[2][2]/confusion.sum(axis=0)[2] * 100) + "%"
+    if config.getConfig('report/showConfusion'):
+        print "Confusion matrix:"
+        print confusion
+        print "Small marginal: " + "%.2f"%float(confusion[0][0]/confusion.sum(axis=0)[0] * 100) + "%"
+        print "Medium marginal: " + "%.2f"%float(confusion[1][1]/confusion.sum(axis=0)[1] * 100) + "%"
+        print "Large marginal: " + "%.2f"%float(confusion[2][2]/confusion.sum(axis=0)[2] * 100) + "%"
     return accuracy
 
 def runData(config, features, output):
