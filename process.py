@@ -40,14 +40,14 @@ def cleanEnds(accData, gyroData):
     threshold = np.std(accData[:, 1])
     start = 0
     for i in xrange(len(accData)):
+        start = accData[i, 0]
         if abs(accData[i, 1]) > threshold:
             break
-        start = accData[i, 0]
     end = 0
     for i in xrange(len(accData) - 1, -1, -1):
+        end = accData[i, 0]
         if abs(accData[i, 1]) > threshold:
             break
-        end = accData[i, 0]
 
     return (filterByTime(start, end, accData), filterByTime(start, end, gyroData))
 

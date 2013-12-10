@@ -44,12 +44,13 @@ def plotEntry(entry):
     accData = np.array(plotdata.readNumericData(entry['accfile']))
     gyroData = np.array(plotdata.readNumericData(entry['gyrofile']))
 
-    accData = accData[:len(accData) * dataPortion, :]
-    gyroData = gyroData[:len(gyroData) * dataPortion, :]
-
     accData, gyroData = process.cleanData(accData, gyroData)
     # process data
     accData, gyroData = process.processData(accData, gyroData)
+
+    # take sample of data
+    accData = accData[:len(accData) * dataPortion, :]
+    gyroData = gyroData[:len(gyroData) * dataPortion, :]
 
     # plot accelerometer/gyroscope
     X = accData[:, 0]
@@ -81,9 +82,9 @@ def plotEntry(entry):
     else:
         f, (ax1, ax2) = plt.subplots(2, 1) #, sharex=True)
         ax1.set_title(entry['device'] + ' - ' + sample + ' - accelerometer')
-        #ax1.plot(X, accData[:, 1], 'r', label='x')
+        ax1.plot(X, accData[:, 1], 'r', label='x')
         ax1.plot(X, accData[:, 2], 'g', label='y')
-        #ax1.plot(X, accData[:, 3], 'b', label='z')
+        ax1.plot(X, accData[:, 3], 'b', label='z')
 
         ax1.legend()
 

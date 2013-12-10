@@ -46,9 +46,9 @@ def cleanEnds(accData, gyroData):
         start = accData[i, 0]
     end = 0
     for i in xrange(len(accData) - 1, -1, -1):
+        end = accData[i, 0]
         if abs(accData[i, 1]) > threshold:
             break
-        end = accData[i, 0]
 
     return (filterByTime(start, end, accData), filterByTime(start, end, gyroData))
 
