@@ -59,6 +59,20 @@ def normalizeOutput(config, output):
         output = [float(l[1]) for l in output]
     return output
 
+def printBaseline(config, trainOutput, testOutput):
+    model = getModel(config)
+    isDiscrete = model.isDiscrete
+    if isDiscrete:
+        # assuming outputs are all non-negative
+        mostCommon = bincount(trainOutput).argmax()
+        baseline = len([i for i in testOutput if i == mostCommon]) / float(len(testOutput))
+        print "Baseline: " + "%.2f" % (baseline * 100) + "%"
+    else:
+        avg = float(sum(trainOutput)) / len(trainOutput)
+        baselineDifferences = sum([abs(avg - real) for real in testOutput])
+        baseline = float(baselineDifferences) / len(testOutput)
+        print "Baseline Difference: " + "%.2f" % baseline
+
 def trainTest(config, X, Y, testFeatures, testOutput, showBaseline=False, confusion=None):
     trainIDs = [l[0] for l in Y]
     testIDs = [l[0] for l in testOutput]
@@ -91,28 +105,16 @@ def trainTest(config, X, Y, testFeatures, testOutput, showBaseline=False, confus
                 output += attrOutput.strip(',')
                 output += ")"
                 print output
+    showBaseline = reportConfig.get('showBaseline', False)
     if isDiscrete:
-        if showBaseline:
-            counts = zeros(3)
-            for i in xrange(3):
-                counts[i] = Y.count(i)
-            mostCommon = argmax(counts)
-            baselinePreds = ones(len(testOutput))*mostCommon
-            baseline = len([i for i, j in zip(baselinePreds, testOutput) if i == j]) / float(len(testOutput))
-            print "Baseline: " + "%.2f" % (baseline * 100) + "%"
         accuracy = float(numCorrect) / len(testOutput)
     else:
-        if showBaseline:
-            avg = float(sum(Y)) / len(Y)
-            baselineDifferences = sum([abs(avg - real) for real in testOutput])
-            baseline = float(baselineDifferences) / len(testOutput)
-            print "Baseline Difference: " + "%.2f" % baseline
         sumofdifferences = sum([abs(pred - real) for pred, real in zip(predicted, testOutput)])
         accuracy = float(sumofdifferences) / len(testOutput)
     return accuracy
 
 def runWithSameTrainTest(config, features, output):
-    return trainTest(config, features, output, features, output, True)
+    return trainTest(config, features, output, features, output)
 
 def runWithCrossValidation(config, features, output, skf, confusion=None):
     X = array(features)
@@ -123,6 +125,11 @@ def runWithCrossValidation(config, features, output, skf, confusion=None):
         Y_train, Y_test = Y[train_index], Y[test_index]
 
         accuracies.append(trainTest(config, X_train, Y_train, X_test, Y_test, confusion=confusion))
+
+    if config.get('report/showBaseline', True):
+        # just aggregate the general baseline
+        normalizeY = normalizeOutput(config, Y)
+        printBaseline(config, normalizeY, normalizeY) 
     return sum(accuracies) / len(accuracies)
 
 def runWithLeaveOneOut(config, features, output):
@@ -171,7 +178,7 @@ def runWithHoldout(config, features, output):
     testOutput = output[sep:]
 
     confusion=zeros((3,3))
-    accuracy = trainTest(config, trainFeatures, trainOutput, testFeatures, testOutput, True, confusion=confusion)
+    accuracy = trainTest(config, trainFeatures, trainOutput, testFeatures, testOutput, confusion=confusion)
     if config.getConfig('report/showConfusion'):
         print "Confusion matrix:"
         print confusion
