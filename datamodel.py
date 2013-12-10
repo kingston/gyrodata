@@ -12,6 +12,7 @@ from sklearn.multiclass import OneVsRestClassifier
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.grid_search import GridSearchCV
 from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.ensemble import ExtraTreesClassifier
 
 # Function decorators for tagging methods
 
@@ -43,13 +44,13 @@ def predictWithRandomForest(config, X, Y, testFeatures):
 
 @discreteResponse
 def predictWithLDA(config, X, Y, testFeatures):
-    clf = LDA(priors=[.5,.5])
+    clf = LDA()
     clf.fit(X, Y)
     return clf.predict(testFeatures)
 
 @discreteResponse
 def predictWithQDA(config, X, Y, testFeatures):
-    clf = QDA(priors=[.5,.5])
+    clf = QDA()
     clf.fit(X, Y)
     return clf.predict(testFeatures)
 
@@ -84,7 +85,7 @@ def predictWithPerceptron(config, X, Y, testFeatures):
 
 @discreteResponse
 def predictWithAdaBoost(config, X, Y, testFeatures):
-    clf = AdaBoostClassifier(n_estimators=100)
+    clf = AdaBoostClassifier(n_estimators=100,learning_rate=1.0, algorithm='SAMME.R')
     clf.fit(X,Y)
     return clf.predict(testFeatures)
 
@@ -101,6 +102,12 @@ def predictWithLasso(config, X, Y,testFeatures):
 @discreteResponse
 def predictWithGradientBoosting(config, X, Y, testFeatures):
     clf = GradientBoostingClassifier()
+    clf.fit(X,Y)
+    return clf.predict(testFeatures)
+    
+@discreteResponse
+def predictWithExtraTrees(config, X, Y, testFeatures):
+    clf = ExtraTreesClassifier()
     clf.fit(X,Y)
     return clf.predict(testFeatures)
     

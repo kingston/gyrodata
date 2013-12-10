@@ -4,7 +4,7 @@ import os, yaml, random
 from optparse import OptionParser
 import gyrodata
 from numpy import *
-import kingstondev, fanhaldev, daviddev
+import kingstondev, fanhaldev, daviddev, daviddev1, daviddev2, daviddev3, basic, fdev
 
 def readNumericData(path):
     data = gyrodata.readCsvData(path)
@@ -22,7 +22,22 @@ def extractFeatures(entry, config):
 
     if featureConfig['david']:
         daviddev.extractFeatures(features, entry, config)
+    
+    if featureConfig['david1']:
+        daviddev1.extractFeatures(features, entry, config)
+        
+    if featureConfig['david2']:
+        daviddev2.extractFeatures(features, entry, config)
+        
+    if featureConfig['david3']:
+        daviddev3.extractFeatures(features, entry, config)
+        
+    if featureConfig['basic']:
+        basic.extractFeatures(features, entry, config)
 
+    if featureConfig['fdev']:
+        fdev.extractFeatures(features, entry, config)
+        
     if featureConfig['max-point']:
         if config['data-filters']['accfile']:
             accData = array(readNumericData(entry['accfile']))
