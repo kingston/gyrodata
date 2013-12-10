@@ -26,6 +26,12 @@ def isValidEntry(entry, config):
         if attr in filters:
             if filters[attr] and filters[attr] and not entry[attr]:
                 return False
+    
+    if 'extreme' in filters:
+        variable = filters['extreme']
+        splits = config['output']['buckets']['splits']
+        if float(entry[variable]) >= float(splits[0]) and float(entry[variable]) <= float(splits[1]):
+            return False
 
     def checkValidFile(path, numKeys, minRecords):
             # check for valid values in acc file

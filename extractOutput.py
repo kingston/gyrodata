@@ -15,6 +15,9 @@ def parseEntry(entry, variable):
             return 1
         else:
             sys.exit("Unknown gender: " + val)
+    elif variable == "person":
+        print int(float(val[6:]))
+        return int(float(val[6:]))
     return float(val)
 
 def extractMetadata(data, config):

@@ -6,12 +6,15 @@ import gyrodata, datamodel
 from gyroconfig import GyroConfig
 import sklearn
 from sklearn import cross_validation
+from sklearn import preprocessing
 from numpy import *
 from distutils.version import StrictVersion
 from matplotlib.mlab import PCA
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from sklearn.decomposition import PCA
 import csv
+
 
 metadataPath = None
 cachedData = None
@@ -44,6 +47,7 @@ def getModel(config):
         "AdaBoost": datamodel.predictWithAdaBoost,
         "lasso": datamodel.predictWithLasso,
         "gradient-boosting": datamodel.predictWithGradientBoosting,
+        "extra-trees": datamodel.predictWithExtraTrees,
     }
     if modelType in models:
         return models[modelType]
@@ -76,6 +80,32 @@ def printBaseline(config, trainOutput, testOutput):
 def trainTest(config, X, Y, testFeatures, testOutput, showBaseline=False, confusion=None):
     trainIDs = [l[0] for l in Y]
     testIDs = [l[0] for l in testOutput]
+    
+    '''
+    U, s, V = linalg.svd(X, full_matrices=True)
+    #S = zeros((len(U[:,1]), 20), dtype=float)
+    #S[:20, :20] = diag(s)
+    #dot(dot(U,S),V)
+    pc = V.T
+    X = dot(X,pc[:,1:10])
+    testFeatures = dot(testFeatures,pc[:,1:10])
+    '''
+    
+    '''
+    print X.shape
+    print U.shape
+    print s.shape
+    print V.shape
+    print s
+    print diag(s)
+    print 
+    print X
+    '''
+    
+    outputConfig = config['output']
+    bucketConfig = outputConfig['buckets']
+    numBuckets = bucketConfig['num']
+    print numBuckets
 
     Y = normalizeOutput(config, Y)
     testOutput = normalizeOutput(config, testOutput)
@@ -117,6 +147,11 @@ def runWithSameTrainTest(config, features, output):
     return trainTest(config, features, output, features, output)
 
 def runWithCrossValidation(config, features, output, skf, confusion=None):
+    outputConfig = config['output']
+    bucketConfig = outputConfig['buckets']
+    numBuckets = bucketConfig['num']
+    print numBuckets
+    
     X = array(features)
     Y = array(output)
     accuracies = []
@@ -133,18 +168,27 @@ def runWithCrossValidation(config, features, output, skf, confusion=None):
     return sum(accuracies) / len(accuracies)
 
 def runWithLeaveOneOut(config, features, output):
+    outputConfig = config['output']
+    bucketConfig = outputConfig['buckets']
+    numBuckets = bucketConfig['num']
+    print numBuckets
     skf = cross_validation.LeaveOneOut(len(features))
-    confusion = zeros((3,3))
-    predicted=zeros(len(output))
+    confusion = zeros((numBuckets,numBuckets))
     accuracy = runWithCrossValidation(config, features, output, skf, confusion=confusion)
     print "Confusion matrix:"
     print confusion
-    print "Small marginal: " + "%.2f"%float(confusion[0][0]/confusion.sum(axis=0)[0] * 100) + "%"
-    print "Medium marginal: " + "%.2f"%float(confusion[1][1]/confusion.sum(axis=0)[1] * 100) + "%"
-    print "Large marginal: " + "%.2f"%float(confusion[2][2]/confusion.sum(axis=0)[2] * 100) + "%"
+    for i in range(0,numBuckets):
+        if confusion.sum(axis=0)[i] != 0:
+            print "Bucket " + "%.0f"%float(i) + " accuracy: " + "%.2f"%float(confusion[i][i]/confusion.sum(axis=0)[i] * 100) + "%"
+    #print "Small marginal: " + "%.2f"%float(confusion[0][0]/confusion.sum(axis=0)[0] * 100) + "%"
+    #print "Medium marginal: " + "%.2f"%float(confusion[1][1]/confusion.sum(axis=0)[1] * 100) + "%"
+    #print "Large marginal: " + "%.2f"%float(confusion[2][2]/confusion.sum(axis=0)[2] * 100) + "%"
     return accuracy
 
 def runWithKFold(config, features, output):
+    outputConfig = config['output']
+    bucketConfig = outputConfig['buckets']
+    numBuckets = bucketConfig['num']
     kConfig = config.getConfig('validation/k-fold')
     k = kConfig.get('k', 10)
     if StrictVersion(sklearn.__version__) > StrictVersion('0.12'):
@@ -158,17 +202,24 @@ def runWithKFold(config, features, output):
         else:
             skf = cross_validation.KFold(len(output), k)
 
-    confusion=zeros((3,3))
+    confusion=zeros((numBuckets,numBuckets))
     accuracy = runWithCrossValidation(config, features, output, skf, confusion=confusion)
     if config.getConfig('report/showConfusion'):
         print "Confusion matrix:"
         print confusion
-        print "Small marginal: " + "%.2f"%float(confusion[0][0]/confusion.sum(axis=0)[0] * 100) + "%"
-        print "Medium marginal: " + "%.2f"%float(confusion[1][1]/confusion.sum(axis=0)[1] * 100) + "%"
-        print "Large marginal: " + "%.2f"%float(confusion[2][2]/confusion.sum(axis=0)[2] * 100) + "%"
+        for i in range(0,numBuckets):
+            if confusion.sum(axis=0)[i] != 0:
+                print "Bucket " + "%.0f"%float(i) + " accuracy: " + "%.2f"%float(confusion[i][i]/confusion.sum(axis=0)[i] * 100) + "%"
+        #print "Small marginal: " + "%.2f"%float(confusion[0][0]/confusion.sum(axis=0)[0] * 100) + "%"
+        #print "Medium marginal: " + "%.2f"%float(confusion[1][1]/confusion.sum(axis=0)[1] * 100) + "%"
+        #print "Large marginal: " + "%.2f"%float(confusion[2][2]/confusion.sum(axis=0)[2] * 100) + "%"
     return accuracy
 
 def runWithHoldout(config, features, output):
+    outputConfig = config['output']
+    bucketConfig = outputConfig['buckets']
+    numBuckets = bucketConfig['num']
+    print numBuckets
     n = len(features)
     trainSize = config.get('validation/holdout/trainSize')
     sep = int(n * trainSize)
@@ -177,14 +228,17 @@ def runWithHoldout(config, features, output):
     trainOutput = output[0:sep]
     testOutput = output[sep:]
 
-    confusion=zeros((3,3))
+    confusion=zeros((numBuckets,numBuckets))
     accuracy = trainTest(config, trainFeatures, trainOutput, testFeatures, testOutput, confusion=confusion)
     if config.getConfig('report/showConfusion'):
         print "Confusion matrix:"
         print confusion
-        print "Small marginal: " + "%.2f"%float(confusion[0][0]/confusion.sum(axis=0)[0] * 100) + "%"
-        print "Medium marginal: " + "%.2f"%float(confusion[1][1]/confusion.sum(axis=0)[1] * 100) + "%"
-        print "Large marginal: " + "%.2f"%float(confusion[2][2]/confusion.sum(axis=0)[2] * 100) + "%"
+        for i in range(0,numBuckets):
+            if confusion.sum(axis=0)[i] != 0:
+                print "Bucket " + "%.0f"%float(i) + " accuracy: " + "%.2f"%float(confusion[i][i]/confusion.sum(axis=0)[i] * 100) + "%"
+        #print "Small marginal: " + "%.2f"%float(confusion[0][0]/confusion.sum(axis=0)[0] * 100) + "%"
+        #print "Medium marginal: " + "%.2f"%float(confusion[1][1]/confusion.sum(axis=0)[1] * 100) + "%"
+        #print "Large marginal: " + "%.2f"%float(confusion[2][2]/confusion.sum(axis=0)[2] * 100) + "%"
     return accuracy
 
 def runData(config, features, output):
