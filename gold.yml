@@ -24,6 +24,7 @@ preprocess:
 
 # Feature configuration
 features:
+  kingstonreal: false
   kingston: false
   david: true
   fanhal: false
@@ -63,6 +64,10 @@ report:
   showIncorrect: true
   # attributes to show from incorrect entries
   incorrectAttrs: ['gender', 'weight']
+  # show confusion matrix
+  showConfusion: true
+  # show baseline
+  showBaseline: true
 
 model:
   # Type of model to run it on
@@ -74,7 +79,7 @@ model:
   # - svc (SVM)
   # - svr (SVM with regression)
   # - AdaBoost (ada boost)
-  type: AdaBoost
+  type: svc
 
   svc:
     kernel: rbf

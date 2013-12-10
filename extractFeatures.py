@@ -4,7 +4,7 @@ import os, yaml, random
 from optparse import OptionParser
 import gyrodata
 from numpy import *
-import kingstondev, fanhaldev, daviddev
+import kingstondev, fanhaldev, daviddev, kingston
 
 def readNumericData(path):
     data = gyrodata.readCsvData(path)
@@ -13,6 +13,9 @@ def readNumericData(path):
 def extractFeatures(entry, config):
     features = []
     featureConfig = config['features']
+
+    if featureConfig['kingstonreal']:
+        kingston.extractFeatures(features, entry, config)
 
     if featureConfig['kingston']:
         kingstondev.extractFeatures(features, entry, config)

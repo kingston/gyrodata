@@ -1,8 +1,9 @@
-import data
 import numpy as np
 import scipy
 from scipy import integrate, signal
 import math
+from math import *
+from numpy.linalg import inv
 
 def filterByTime(start, end, data):
     return data[(data[:, 0] >= start) & (data[:, 0] <= end)]
@@ -58,3 +59,65 @@ def cleanData(accData, gyroData):
     (gyroData, accData) = cleanSeparateData(gyroData, accData)
 
     return normalizeDatasets(accData, gyroData)
+
+def processData(accData, gyroData):
+    gyro = []
+    for i in range(3):
+        # interpolate data with accelerometer data and convert to radians
+        gyro.append(np.interp(accData[:, 0], gyroData[:, 0], gyroData[:, i + 1]) * math.pi / 180.0)
+    gyroData = np.column_stack((accData[:, 0], gyro[0], gyro[1], gyro[2]))
+
+    for i in range(len(accData)):
+        tx = gyroData[i, 2]
+        ty = gyroData[i, 3]
+        tz = gyroData[i, 1]
+        Rx = np.array([[1,0,0], [0, cos(tx), -sin(tx)], [0, sin(tx), cos(tx)]])
+        Ry = np.array([[cos(ty), 0, sin(ty)], [0, 1, 0], [-sin(ty), 0, cos(ty)]])
+        Rz = np.array([[cos(tz), -sin(tz), 0], [sin(tz), cos(tz), 0], [0,0,1]])
+        R = np.dot(Rx, np.dot(Ry, Rz))
+
+        vec = (accData[i, 1], accData[i, 2], accData[i, 3])
+        (accData[i, 1], accData[i, 2], accData[i, 3]) = np.dot(R, vec)
+
+    # integrate y-data
+
+    #for i in range(3):
+        ## integrate data for approximate velocity
+        #accData[:,i] = integrate.cumtrapz(accData[:, i], accData[:, 0], initial=0)
+
+    return (accData, gyroData)
+
+    # reinterpolate acceleration data into even samples
+    minTime = accData[:, 0].min()
+    maxTime = accData[:, 0].max()
+    newTime, step = scipy.linspace(minTime, maxTime, num=len(accData[:, 0]), retstep = True)
+    for i in range(3):
+        accData[:, i + 1] = np.interp(newTime, accData[:, 0], accData[:, i + 1])
+    accData[:, 0] = newTime
+
+    # apply fft transform
+    for i in range(3):
+        FFT = abs(scipy.fft(accData[:, i + 1]))
+        #freqs = scipy.fftpack.fftfreq(len(newTime), step)
+        #accData[:, 0] = freqs
+        accData[:, i + 1] = scipy.log10(FFT)
+
+    gyro = [];
+    for i in range(3):
+        # convert gyrometer data to radians
+        gyro.append(gyrodata[:, i + 1] * 2 * math.pi)
+        # integrate data for approximate location
+        gyro[i] = integrate.cumtrapz(gyro[i], gyrodata[:, 0], initial=0)
+        # apply high pass filter to reduce drift
+        # and we don't care about overall change in motion
+        #
+        
+        # interpolate data with accelerometer data
+        gyro[i] = np.interp(accdata[:, 0], gyrodata[:, 0], gyro[i])
+
+    gyroData = np.column_stack((accData[:, 0], gyro[0], gyro[1], gyro[2]))
+    # interpolate gyro data
+    yGyro = np.interp(accData[:, 0], gyroData[:, 0], gyroData[:, 2])
+    zGyro = np.interp(accData[:, 0], gyroData[:, 0], gyroData[:, 3])
+
+    return (accData, gyroData)
