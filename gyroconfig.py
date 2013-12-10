@@ -35,4 +35,4 @@ class GyroConfig(object):
         return key in self.config
 
     def __getitem__(self, key):
-        return self._wrapReturn(self.config[key])
+        return self._wrapReturn(self.config.get(key))

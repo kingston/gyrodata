@@ -20,6 +20,7 @@ def parseMeta(path, person, activityFolder):
         'Weight(kg)': 'weight',
         'TerminalPosition': 'position',
         'TerminalMount': 'mount',
+        'TerminalType': 'device',
         'AttachmentDirection': 'direction',
     }
     data = {
@@ -42,6 +43,8 @@ def parseMeta(path, person, activityFolder):
         data['age'] = 0
     if 'weight' not in data:
         data['weight'] = 0
+    if 'device' not in data:
+        data['device'] = 'unknown'
     
 
     # hack for gyroscoper data

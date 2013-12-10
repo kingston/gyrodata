@@ -13,6 +13,7 @@ from sklearn.ensemble import AdaBoostClassifier
 from sklearn.grid_search import GridSearchCV
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.ensemble import ExtraTreesClassifier
+import sklearn
 
 # Function decorators for tagging methods
 

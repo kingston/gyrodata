@@ -1,4 +1,3 @@
-import data
 import numpy as np
 import scipy
 from scipy import integrate, signal

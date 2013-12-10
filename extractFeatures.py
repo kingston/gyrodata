@@ -2,9 +2,10 @@
 
 import os, yaml, random
 from optparse import OptionParser
+from gyroconfig import GyroConfig
 import gyrodata
 from numpy import *
-import kingstondev, fanhaldev, daviddev, daviddev1, daviddev2, daviddev3, basic, fdev
+import kingstondev, fanhaldev, daviddev, daviddev1, daviddev2, daviddev3, basic, fdev, kingston
 
 def readNumericData(path):
     data = gyrodata.readCsvData(path)
@@ -12,7 +13,10 @@ def readNumericData(path):
 
 def extractFeatures(entry, config):
     features = []
-    featureConfig = config['features']
+    featureConfig = config.getConfig('features')
+
+    if featureConfig['kingstonreal']:
+        kingston.extractFeatures(features, entry, config)
 
     if featureConfig['kingston']:
         kingstondev.extractFeatures(features, entry, config)
@@ -68,11 +72,7 @@ def main():
     if len(args) != 1:
         parser.error("wrong number of arguments")
 
-    try:
-        with open(options.config, 'r') as configFile:
-            config = yaml.load(configFile)
-    except IOError:
-        sys.exit("Unable to find configuration file " + options.config)
+    config = GyroConfig.load(options.config)
 
     data = gyrodata.readMetadata(args[0])
     features = [extractFeatures(entry, config) for entry in data]

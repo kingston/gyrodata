@@ -4,7 +4,7 @@
 data-filters:
   activity: walk
   position: waist
-  activityFolder: ~
+  activityFolder: gyroscoper
   #gender: male
   #mount: fixed
   #direction: front
@@ -18,8 +18,13 @@ data-filters:
   # check for min records in files
   minRecords: 250
 
+# Preprocess data?
+preprocess:
+  clean: true
+
 # Feature configuration
 features:
+  kingstonreal: false
   kingston: false
   david: true
   fanhal: false
@@ -59,6 +64,10 @@ report:
   showIncorrect: true
   # attributes to show from incorrect entries
   incorrectAttrs: ['gender', 'weight']
+  # show confusion matrix
+  showConfusion: true
+  # show baseline
+  showBaseline: true
 
 model:
   # Type of model to run it on
@@ -70,7 +79,7 @@ model:
   # - svc (SVM)
   # - svr (SVM with regression)
   # - AdaBoost (ada boost)
-  type: AdaBoost
+  type: svc
 
   svc:
     kernel: rbf
