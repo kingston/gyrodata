@@ -65,20 +65,26 @@ def processData(accData, gyroData):
     gyro = []
     for i in range(3):
         # interpolate data with accelerometer data and convert to radians
-        gyro.append(np.interp(accData[:, 0], gyroData[:, 0], gyroData[:, i + 1]) / 360 * 2 * math.pi)
+        gyro.append(np.interp(accData[:, 0], gyroData[:, 0], gyroData[:, i + 1]) * math.pi / 180.0)
     gyroData = np.column_stack((accData[:, 0], gyro[0], gyro[1], gyro[2]))
 
     for i in range(len(accData)):
-        tx = gyroData[i, 1]
-        ty = gyroData[i, 2]
-        tz = gyroData[i, 3]
+        tx = gyroData[i, 2]
+        ty = gyroData[i, 3]
+        tz = gyroData[i, 1]
         Rx = np.array([[1,0,0], [0, cos(tx), -sin(tx)], [0, sin(tx), cos(tx)]])
-        Ry = np.array([[cos(ty), 0, -sin(ty)], [0, 1, 0], [sin(ty), 0, cos(ty)]])
+        Ry = np.array([[cos(ty), 0, sin(ty)], [0, 1, 0], [-sin(ty), 0, cos(ty)]])
         Rz = np.array([[cos(tz), -sin(tz), 0], [sin(tz), cos(tz), 0], [0,0,1]])
         R = np.dot(Rx, np.dot(Ry, Rz))
 
         vec = (accData[i, 1], accData[i, 2], accData[i, 3])
-        (accData[i, 1], accData[i, 2], accData[i, 3]) = np.dot(inv(R), vec)
+        (accData[i, 1], accData[i, 2], accData[i, 3]) = np.dot(R, vec)
+
+    # integrate y-data
+
+    #for i in range(3):
+        ## integrate data for approximate velocity
+        #accData[:,i] = integrate.cumtrapz(accData[:, i], accData[:, 0], initial=0)
 
     return (accData, gyroData)
 
@@ -99,16 +105,16 @@ def processData(accData, gyroData):
 
     gyro = [];
     for i in range(3):
-        # Convert gyrometer data to radians
-        gyro.append(gyroData[:, i + 1] * 2 * math.pi)
-        # Integrate data for approximate location
-        gyro[i] = integrate.cumtrapz(gyro[i], gyroData[:, 0], initial=0)
+        # convert gyrometer data to radians
+        gyro.append(gyrodata[:, i + 1] * 2 * math.pi)
+        # integrate data for approximate location
+        gyro[i] = integrate.cumtrapz(gyro[i], gyrodata[:, 0], initial=0)
         # apply high pass filter to reduce drift
         # and we don't care about overall change in motion
         #
         
         # interpolate data with accelerometer data
-        gyro[i] = np.interp(accData[:, 0], gyroData[:, 0], gyro[i])
+        gyro[i] = np.interp(accdata[:, 0], gyrodata[:, 0], gyro[i])
 
     gyroData = np.column_stack((accData[:, 0], gyro[0], gyro[1], gyro[2]))
     # interpolate gyro data
