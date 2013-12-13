@@ -15,8 +15,10 @@ def extractFeatures(features, entry, config):
         
         accData = array(readNumericData(entry['accfile']))
         accData = accData[150:(len(accData[:,0])-60),:]
+        
         features += accData.mean(axis=0)[1:].tolist()
         features += accData.std(axis=0)[1:].tolist()
+        
         totalAcc = sqrt((square(accData[:,1]) + square(accData[:,2]) + square(accData[:,3])))
         
         medFilterAccX = signal.medfilt(accData[:,1],11)
@@ -84,15 +86,32 @@ def extractFeatures(features, entry, config):
         features.append(std(bodyJerkZ))
         
         #wavelet = signal.ricker
-        #widths = arange(120,150)
-        #peakind = signal.find_peaks_cwt(bodyAccZ, widths)
+        '''
+        gyroData = array(readNumericData(entry['gyrofile']))
+        gyroData = gyroData[150:(len(gyroData[:,0])-60),:]
 
-        #features.append(mean(peakind))
+        gyroFilterAccY = signal.medfilt(gyroData[:,2],11)
+        
+        b, a = signal.butter(3, 10.0/25, btype='low')
+        butterGyroY = signal.filtfilt(b,a,gyroFilterAccY)
+        widths = arange(5,10)
+        peakind = signal.find_peaks_cwt(butterGyroY, widths)
+        #print entry
+        print peakind
+        if len(peakind)<=1: peakind = signal.find_peaks_cwt(-1*butterGyroY, widths)
+        if len(peakind)<=1: 
+            plt.plot(range(1,len(butterGyroY)+1),butterGyroY)
+            plt.show()
+        #time.sleep(100000000)
+
+        features.append(mean(diff(peakind)))
 
         #features.append(sum(abs(signal.cwt(gravityAccZ, wavelet, widths))))
+        '''
         # Frequency domain
         
-        windowSize=len(totalAcc)
+        #totalAcc = butterGyroY
+        windowSize=max(len(totalAcc),250)
         n=len(totalAcc)
         nWindows=0
         total=zeros(windowSize)
@@ -108,3 +127,4 @@ def extractFeatures(features, entry, config):
         idx = argmax(abs(meanFourier)**2)
         #features += [freq[idx]] # Dominant frequency
         #features += [abs(sum(meanFourier))] # Coefficients sum
+        

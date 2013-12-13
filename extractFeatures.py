@@ -5,7 +5,7 @@ from optparse import OptionParser
 from gyroconfig import GyroConfig
 import gyrodata
 from numpy import *
-import kingstondev, fanhaldev, daviddev, daviddev1, daviddev2, daviddev3, basic, fdev, kingston
+import kingstondev, fanhaldev, daviddev, daviddev1, daviddev2, daviddev3, basic, fdev, kingston, master
 
 def readNumericData(path):
     data = gyrodata.readCsvData(path)
@@ -40,6 +40,9 @@ def extractFeatures(entry, config):
         basic.extractFeatures(features, entry, config)
 
     if featureConfig['fdev']:
+        fdev.extractFeatures(features, entry, config)
+
+    if featureConfig['master']:
         fdev.extractFeatures(features, entry, config)
         
     if featureConfig['max-point']:

@@ -5,15 +5,27 @@ import statsmodels.tsa.arima_model as ap
 import matplotlib.pyplot as plt
 import time
 import pylab
+import process
 
 def readNumericData(path):
     data = gyrodata.readCsvData(path)
     return [[float(x or 0) for x in l] for l in data]
 
 def extractFeatures(features, entry, config):
-    
+
     if config['data-filters']['accfile']:
-        
+        '''
+        if not config['data-filters']['gyrofile']: return
+        if not config['data-filters']['accfile']: return
+
+        accData = array(readNumericData(entry['accfile']))
+        gyroData = array(readNumericData(entry['gyrofile']))
+
+        # clean data up
+        #accData, gyroData = process.cleanData(accData, gyroData)
+        # process data
+        #accData, gyroData = process.processData(accData, gyroData)
+        '''
         accData = array(readNumericData(entry['accfile']))
         accData = accData[150:(len(accData[:,0])-60),:]
         features += accData.mean(axis=0)[1:].tolist()
@@ -46,8 +58,14 @@ def extractFeatures(features, entry, config):
         
         totalAcc = sqrt(square(bodyAccX)+square(bodyAccY)+square(bodyAccZ))
         features.append(mean(totalAcc))
-        
-        
+        '''
+        plt.plot(range(1,len(gravityAccY)+1),gravityAccY)
+        plt.show()
+        plt.plot(range(1,len(gravityAccX)+1),gravityAccX)
+        plt.show()
+        plt.plot(range(1,len(gravityAccZ)+1),gravityAccZ)
+        plt.show()
+        '''
         features.append(mean(bodyAccX))
         features.append(std(bodyAccX))
         features.append(mean(bodyAccY))
