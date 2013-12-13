@@ -30,8 +30,12 @@ def runData(config, options):
     safeRun("python extractFeatures.py -c %s -o %s %s" % (options.config, featuresCsv, filteredCsv))
     safeRun("python extractOutput.py -c %s -o %s %s" % (options.config, outputCsv, filteredCsv))
 
-    # Test data
-    safeRun("python trainTest.py -c %s %s %s %s" % (options.config, featuresCsv, outputCsv, filteredCsv))
+    if options.features:
+        # Test data
+        safeRun("python filterFeatureSelection.py -c %s %s %s %s" % (options.config, featuresCsv, outputCsv, filteredCsv))
+    else:
+        # Test data
+        safeRun("python trainTest.py -c %s %s %s %s" % (options.config, featuresCsv, outputCsv, filteredCsv))
 
     # Remove all prefixed files
     safeRun("rm -f tmp/%s*" % prefix)
@@ -49,6 +53,11 @@ def main():
             action="store_true",
             dest="meta",
             help="Force meta data file regeneration (from corpus)",)
+
+    parser.add_option("-f", "--features",
+            action="store_true",
+            dest="features",
+            help="Identify most significant features",)
 
     (options, args) = parser.parse_args()
 
