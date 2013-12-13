@@ -88,7 +88,7 @@ model:
     useRandomLog: true
     priors: [0.3125, 0.405, 0.2825]
 
-  ada:
+  qda:
     useRandomLog: true
     priors: [0.3125, 0.405, 0.2825]
 
