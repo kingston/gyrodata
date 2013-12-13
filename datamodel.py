@@ -63,7 +63,7 @@ def predictWithLDA(config, X, Y, testFeatures):
 
 @discreteResponse
 def predictWithQDA(config, X, Y, testFeatures):
-    qdaConfig = config.getConfig('model/lda')
+    qdaConfig = config.getConfig('model/qda')
     if qdaConfig.get('useRandomLog', False):
         clf = RandomizedLogisticRegression()
         clf.fit(X, Y)
