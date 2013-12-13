@@ -32,8 +32,8 @@ features:
 
 # Output variable configuration
 output:
-  variable: gender
-  is-bucketed: false
+  variable: height
+  is-bucketed: true
   buckets:
     num: 3
     manual: false
@@ -79,7 +79,18 @@ model:
   # - svc (SVM)
   # - svr (SVM with regression)
   # - AdaBoost (ada boost)
-  type: svc
+  type: lda
 
   svc:
     kernel: rbf
+
+  lda:
+    useRandomLog: true
+    priors: [0.3125, 0.405, 0.2825]
+
+  ada:
+    useRandomLog: true
+    priors: [0.3125, 0.405, 0.2825]
+
+  adaboost:
+    useRandomLog: true

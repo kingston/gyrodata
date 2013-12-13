@@ -13,6 +13,7 @@ from sklearn.ensemble import AdaBoostClassifier
 from sklearn.grid_search import GridSearchCV
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.ensemble import ExtraTreesClassifier
+from sklearn.linear_model import RandomizedLogisticRegression
 import sklearn
 
 # Function decorators for tagging methods
@@ -45,13 +46,34 @@ def predictWithRandomForest(config, X, Y, testFeatures):
 
 @discreteResponse
 def predictWithLDA(config, X, Y, testFeatures):
-    clf = LDA()
+    ldaConfig = config.getConfig('model/lda')
+    if ldaConfig.get('useRandomLog', False):
+        clf = RandomizedLogisticRegression()
+        clf.fit(X, Y)
+        X_new = clf.transform(X)
+        if not X_new.size == 0:
+            X = X_new
+            testFeatures = clf.transform(testFeatures)
+
+    priors = ldaConfig.get('priors', None)
+
+    clf = LDA(priors = priors)
     clf.fit(X, Y)
     return clf.predict(testFeatures)
 
 @discreteResponse
 def predictWithQDA(config, X, Y, testFeatures):
-    clf = QDA()
+    qdaConfig = config.getConfig('model/lda')
+    if qdaConfig.get('useRandomLog', False):
+        clf = RandomizedLogisticRegression()
+        clf.fit(X, Y)
+        X_new = clf.transform(X)
+        if not X_new.size == 0:
+            X = X_new
+            testFeatures = clf.transform(testFeatures)
+
+    priors = qdaConfig.get('priors', None)
+    clf = QDA(priors = priors)
     clf.fit(X, Y)
     return clf.predict(testFeatures)
 
@@ -86,7 +108,15 @@ def predictWithPerceptron(config, X, Y, testFeatures):
 
 @discreteResponse
 def predictWithAdaBoost(config, X, Y, testFeatures):
-    clf = AdaBoostClassifier(n_estimators=100,learning_rate=1.0, algorithm='SAMME.R')
+    adaConfig = config.getConfig('model/adaboost')
+    if adaConfig.get('useRandomLog', False):
+        clf = RandomizedLogisticRegression()
+        clf.fit(X, Y)
+        X_new = clf.transform(X)
+        if not X_new.size == 0:
+            X = X_new
+            testFeatures = clf.transform(testFeatures)
+    clf = AdaBoostClassifier(n_estimators=50,learning_rate=1.0, algorithm='SAMME.R')
     clf.fit(X,Y)
     return clf.predict(testFeatures)
 
